@@ -1,10 +1,12 @@
 
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit, join_room
+import os
 import random
 import string
-import os
 import time
+import re
+
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO, emit, join_room
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get(
@@ -18,156 +20,209 @@ rooms = {}
 QUESTION_TIME = 15
 RESULT_TIME = 5
 
-QUESTIONS = [
-    {
-        "question": "Welcher Gegenstand entzündet ein Netherportal?",
-        "options": [
-            {"value": "A", "label": "Feuerzeug"},
-            {"value": "B", "label": "Redstone-Fackel"},
-            {"value": "C", "label": "Angel"},
-            {"value": "D", "label": "Kompass"},
-        ],
-        "answer": "A",
-        "explanation": "Mit einem Feuerzeug kannst du den Innenraum des Netherportals entzünden."
+QUIZZES = {
+    "minecraft": {
+        "name": "⛏️ Minecraft-Wissen",
+        "questions": [
+            (
+                "Welcher Mob explodiert?",
+                ["Creeper", "Zombie", "Schaf", "Kuh"],
+                0
+            ),
+            (
+                "Welche Dimension erreicht man mit einem Endportal?",
+                ["Nether", "Ende", "Oberwelt", "Höhle"],
+                1
+            ),
+            (
+                "Wie viele Bretter braucht eine Werkbank?",
+                ["2", "4", "6", "8"],
+                1
+            ),
+            (
+                "Was braucht man zum Entzünden eines Netherportals?",
+                ["Feuerzeug", "Angel", "Kompass", "Fackel"],
+                0
+            ),
+            (
+                "Welche Spitzhacke baut Diamanterz erfolgreich ab?",
+                ["Holz", "Stein", "Eisen", "Gold"],
+                2
+            ),
+            (
+                "Welcher Mob lässt Lohenruten fallen?",
+                ["Ghast", "Lohe", "Zombie", "Piglin"],
+                1
+            ),
+            (
+                "Wie viele Rahmenblöcke hat ein Endportal?",
+                ["8", "10", "12", "16"],
+                2
+            ),
+            (
+                "Welcher Trank ermöglicht Unterwasseratmung?",
+                ["Stärke", "Nachtsicht", "Wasseratmung", "Schnelligkeit"],
+                2
+            ),
+            (
+                "Welcher Block wird für einen Verzauberungstisch benötigt?",
+                ["Obsidian", "Kupfer", "Sand", "Erde"],
+                0
+            ),
+            (
+                "Welcher Bauteil kann Redstone-Signale verzögern?",
+                ["Truhe", "Repeater", "Ofen", "Leiter"],
+                1
+            ),
+        ]
     },
-    {
-        "question": "Welche Spitzhacke brauchst du mindestens, um Diamanterz abzubauen und Diamanten zu erhalten?",
-        "options": [
-            {"value": "A", "label": "Holzspitzhacke"},
-            {"value": "B", "label": "Steinspitzhacke"},
-            {"value": "C", "label": "Eisenspitzhacke"},
-            {"value": "D", "label": "Goldspitzhacke"},
-        ],
-        "answer": "C",
-        "explanation": "Eine Eisenspitzhacke oder eine bessere Spitzhacke kann Diamanterz abbauen."
-    },
-    {
-        "question": "Welcher Mob explodiert in der Nähe eines Spielers?",
-        "options": [
-            {"value": "A", "label": "Zombie"},
-            {"value": "B", "label": "Creeper"},
-            {"value": "C", "label": "Skelett"},
-            {"value": "D", "label": "Kuh"},
-        ],
-        "answer": "B",
-        "explanation": "Der Creeper nähert sich seinem Ziel und explodiert, wenn er nah genug ist."
-    },
-    {
-        "question": "Wie viele Enderaugen passen in den Rahmen eines Endportals?",
-        "options": [
-            {"value": "A", "label": "8"},
-            {"value": "B", "label": "10"},
-            {"value": "C", "label": "12"},
-            {"value": "D", "label": "16"},
-        ],
-        "answer": "C",
-        "explanation": "Der Endportalrahmen besteht aus zwölf Blöcken, die jeweils ein Enderauge aufnehmen können."
-    },
-    {
-        "question": "Welcher dieser Gegenstände wird für einen Verzauberungstisch benötigt?",
-        "options": [
-            {"value": "A", "label": "Obsidian"},
-            {"value": "B", "label": "Kupferblock"},
-            {"value": "C", "label": "Smaragdblock"},
-            {"value": "D", "label": "Netheritbarren"},
-        ],
-        "answer": "A",
-        "explanation": "Für einen Verzauberungstisch brauchst du unter anderem vier Obsidianblöcke."
-    },
-    {
-        "question": "Welcher Gegenstand hilft dir, unter Wasser dauerhaft zu atmen, solange sein Effekt aktiv ist?",
-        "options": [
-            {"value": "A", "label": "Trank der Nachtsicht"},
-            {"value": "B", "label": "Trank der Wasseratmung"},
-            {"value": "C", "label": "Trank der Stärke"},
-            {"value": "D", "label": "Trank der Langsamkeit"},
-        ],
-        "answer": "B",
-        "explanation": "Der Effekt Wasseratmung verhindert, dass dir unter Wasser die Luft ausgeht."
-    },
-    {
-        "question": "Welcher Mob lässt normalerweise Lohenruten fallen?",
-        "options": [
-            {"value": "A", "label": "Ghast"},
-            {"value": "B", "label": "Piglin"},
-            {"value": "C", "label": "Witherskelett"},
-            {"value": "D", "label": "Lohe"},
-        ],
-        "answer": "D",
-        "explanation": "Lohen können Lohenruten fallen lassen, die du unter anderem für Lohenstaub benötigst."
-    },
-    {
-        "question": "Wie viele Holzbretter brauchst du für eine Werkbank?",
-        "options": [
-            {"value": "A", "label": "2"},
-            {"value": "B", "label": "4"},
-            {"value": "C", "label": "6"},
-            {"value": "D", "label": "8"},
-        ],
-        "answer": "B",
-        "explanation": "Vier Holzbretter ergeben eine Werkbank."
-    },
-    {
-        "question": "Welcher Redstone-Bauteil kann ein Signal verstärken und verzögern?",
-        "options": [
-            {"value": "A", "label": "Redstone-Repeater"},
-            {"value": "B", "label": "Truhe"},
-            {"value": "C", "label": "Ofen"},
-            {"value": "D", "label": "Leiter"},
-        ],
-        "answer": "A",
-        "explanation": "Ein Redstone-Repeater erneuert das Signal und kann eine einstellbare Verzögerung hinzufügen."
-    },
-    {
-        "question": "Welche Dimension erreichst du durch ein aktiviertes Endportal?",
-        "options": [
-            {"value": "A", "label": "Nether"},
-            {"value": "B", "label": "Oberwelt"},
-            {"value": "C", "label": "Das Ende"},
-            {"value": "D", "label": "Eine Höhlendimension"},
-        ],
-        "answer": "C",
-        "explanation": "Ein aktiviertes Endportal führt dich in die Dimension Das Ende."
-    },
-]
+
+    "wissen": {
+        "name": "🧠 Allgemeinwissen",
+        "questions": [
+            (
+                "Wie viele Minuten hat eine Stunde?",
+                ["30", "45", "60", "90"],
+                2
+            ),
+            (
+                "Welcher Planet ist der rote Planet?",
+                ["Venus", "Mars", "Saturn", "Neptun"],
+                1
+            ),
+            (
+                "Was ist die Hauptstadt Frankreichs?",
+                ["Rom", "Paris", "Berlin", "Madrid"],
+                1
+            ),
+            (
+                "Wie viele Seiten hat ein Sechseck?",
+                ["5", "6", "7", "8"],
+                1
+            ),
+            (
+                "Wie viel ist 7 × 8?",
+                ["54", "56", "64", "48"],
+                1
+            ),
+            (
+                "Welches Tier ist ein Säugetier?",
+                ["Hai", "Delfin", "Forelle", "Krake"],
+                1
+            ),
+            (
+                "Wie viele Tage hat eine Woche?",
+                ["5", "6", "7", "8"],
+                2
+            ),
+            (
+                "Welches Gas benötigen Pflanzen für Fotosynthese?",
+                ["Helium", "Kohlendioxid", "Neon", "Wasserstoff"],
+                1
+            ),
+            (
+                "Was ist gefrorenes Wasser?",
+                ["Nebel", "Dampf", "Eis", "Salz"],
+                2
+            ),
+            (
+                "Welcher Ozean ist der größte?",
+                ["Atlantik", "Pazifik", "Indischer Ozean", "Arktischer Ozean"],
+                1
+            ),
+        ]
+    }
+}
 
 
-def make_code():
-    while True:
-        code = "".join(
-            random.choices(string.ascii_uppercase + string.digits, k=5)
-        )
-        if code not in rooms:
-            return code
+def clean_profile(data):
+    if not isinstance(data, dict):
+        data = {}
 
+    color = str(data.get("color", "#8B5CF6")).upper()
 
-def get_room(code):
-    room = rooms.get(code)
-    if not room:
-        return None
+    if not re.fullmatch(r"#[0-9A-F]{6}", color):
+        color = "#8B5CF6"
 
-    players = [
-        {
-            "name": player["name"],
-            "is_host": sid == room["host"],
-            "score": player.get("score", 0)
-        }
-        for sid, player in room["players"].items()
-    ]
+    emojis = str(data.get("emojis", "😎")).strip()[:24]
 
-    players.sort(key=lambda player: player["score"], reverse=True)
+    if not emojis:
+        emojis = "😎"
+
+    image = data.get("image", "")
+
+    if not isinstance(image, str):
+        image = ""
+
+    if len(image) > 180000:
+        image = ""
+
+    if image and not image.startswith("data:image/jpeg;base64,"):
+        image = ""
 
     return {
-        "code": code,
-        "players": players,
-        "status": room["status"]
+        "color": color,
+        "emojis": emojis,
+        "image": image
     }
 
 
-def send_room_update(code):
-    room_data = get_room(code)
-    if room_data:
-        socketio.emit("room_updated", {"room": room_data}, to=code)
+def get_players(room):
+    players = []
+
+    for sid, player in room["players"].items():
+        players.append({
+            "id": sid,
+            "name": player["name"],
+            "score": player["score"],
+            "host": sid == room["host"],
+            **player["profile"]
+        })
+
+    return sorted(
+        players,
+        key=lambda player: -player["score"]
+    )
+
+
+def room_update(code):
+    room = rooms.get(code)
+
+    if not room:
+        return
+
+    socketio.emit(
+        "room_updated",
+        {
+            "code": code,
+            "status": room["status"],
+            "quiz": room["quiz"],
+            "players": get_players(room)
+        },
+        to=code
+    )
+
+
+def valid_room(code):
+    room = rooms.get(code)
+
+    if room and request.sid in room["players"]:
+        return room
+
+    return None
+
+
+def generate_code():
+    while True:
+        code = "".join(
+            random.choices(
+                string.ascii_uppercase + string.digits,
+                k=5
+            )
+        )
+
+        if code not in rooms:
+            return code
 
 
 @app.route("/")
@@ -177,255 +232,317 @@ def home():
 
 @socketio.on("create_room")
 def create_room(data):
-    name = str((data or {}).get("name", "")).strip()[:20]
+    data = data or {}
+
+    sid = request.sid
+    code = generate_code()
+
+    name = str(data.get("name", "Champion")).strip()[:20]
 
     if not name:
-        emit("error_message", {"message": "Gib einen Spielernamen ein."})
-        return
-
-    code = make_code()
-    sid = request.sid
+        name = "Champion"
 
     rooms[code] = {
         "host": sid,
         "players": {
-            sid: {"name": name, "score": 0}
+            sid: {
+                "name": name,
+                "profile": clean_profile(data.get("profile")),
+                "score": 0
+            }
         },
         "status": "waiting",
-        "question_index": -1,
+        "quiz": "minecraft",
+        "token": 0,
+        "index": -1,
         "answers": {},
-        "question_started_at": 0,
-        "game_id": 0
+        "started_at": 0,
+        "phase": "idle"
     }
 
     join_room(code)
 
-    emit("room_joined", {
-        "room": get_room(code),
-        "message": "Raum erstellt! Teile den Code mit deinen Mitschülern."
-    })
+    emit("joined", {"code": code})
+
+    room_update(code)
 
 
 @socketio.on("join_room")
 def join_game(data):
     data = data or {}
-    name = str(data.get("name", "")).strip()[:20]
-    code = str(data.get("code", "")).strip().upper()
 
-    if not name or not code:
-        emit("error_message", {
-            "message": "Gib deinen Namen und den Raumcode ein."
-        })
-        return
-
+    code = str(data.get("code", "")).upper().strip()
     room = rooms.get(code)
 
-    if not room:
-        emit("error_message", {
-            "message": "Raum nicht gefunden. Prüfe den Code."
-        })
-        return
-
-    if room["status"] != "waiting":
-        emit("error_message", {
-            "message": "Das Spiel hat bereits begonnen."
-        })
+    if not room or room["status"] != "waiting":
+        emit(
+            "app_error",
+            {"message": "Raum nicht gefunden oder das Quiz läuft bereits."}
+        )
         return
 
     if len(room["players"]) >= 50:
-        emit("error_message", {"message": "Der Raum ist voll."})
+        emit("app_error", {"message": "Dieser Raum ist voll."})
         return
 
+    name = str(data.get("name", "Champion")).strip()[:20]
+
+    if not name:
+        name = "Champion"
+
     sid = request.sid
-    room["players"][sid] = {"name": name, "score": 0}
+
+    room["players"][sid] = {
+        "name": name,
+        "profile": clean_profile(data.get("profile")),
+        "score": 0
+    }
+
     join_room(code)
 
-    emit("room_joined", {
-        "room": get_room(code),
-        "message": f"Du bist Raum {code} beigetreten."
-    })
+    emit("joined", {"code": code})
 
-    send_room_update(code)
+    room_update(code)
+
+
+@socketio.on("select_quiz")
+def select_quiz(data):
+    data = data or {}
+
+    code = str(data.get("code", "")).upper()
+    room = valid_room(code)
+
+    if not room:
+        return
+
+    if request.sid != room["host"]:
+        return
+
+    if room["status"] != "waiting":
+        return
+
+    quiz = data.get("quiz")
+
+    if quiz not in QUIZZES:
+        return
+
+    room["quiz"] = quiz
+
+    room_update(code)
 
 
 @socketio.on("start_game")
 def start_game(data):
-    code = str((data or {}).get("code", "")).strip().upper()
-    room = rooms.get(code)
+    code = str((data or {}).get("code", "")).upper()
+
+    room = valid_room(code)
 
     if not room:
-        emit("error_message", {"message": "Raum nicht gefunden."})
         return
 
     if request.sid != room["host"]:
-        emit("error_message", {
-            "message": "Nur der Spielleiter kann starten."
-        })
         return
 
     if room["status"] != "waiting":
-        emit("error_message", {
-            "message": "Dieses Spiel wurde bereits gestartet."
-        })
         return
 
-    if not room["players"]:
-        emit("error_message", {"message": "Es sind keine Spieler im Raum."})
+    room["status"] = "playing"
+    room["token"] += 1
+
+    for player in room["players"].values():
+        player["score"] = 0
+
+    room_update(code)
+
+    socketio.start_background_task(
+        run_quiz,
+        code,
+        room["token"]
+    )
+
+
+def run_quiz(code, token):
+    room = rooms.get(code)
+
+    if not room:
         return
 
-    room["status"] = "started"
-    room["question_index"] = -1
-    room["answers"] = {}
-    room["game_id"] += 1
-    game_id = room["game_id"]
+    questions = list(QUIZZES[room["quiz"]]["questions"])
+    random.shuffle(questions)
 
-    send_room_update(code)
-    socketio.start_background_task(run_quiz, code, game_id)
-
-
-def run_quiz(code, game_id):
-    question_order = list(range(len(QUESTIONS)))
-    random.shuffle(question_order)
-
-    for index, question_number in enumerate(question_order):
+    for index, (question, options, correct) in enumerate(questions):
         room = rooms.get(code)
 
-        if not room or room["game_id"] != game_id:
+        if not room or room["token"] != token:
             return
 
-        room["question_index"] = index
+        room["index"] = index
         room["answers"] = {}
-        room["question_started_at"] = time.time()
+        room["started_at"] = time.time()
+        room["phase"] = "question"
+        room["current_questions"] = questions
 
-        question = QUESTIONS[question_number]
-
-        socketio.emit("quiz_question", {
-            "question": question["question"],
-            "options": question["options"],
-            "number": index + 1,
-            "total": len(question_order),
-            "duration": QUESTION_TIME
-        }, to=code)
+        socketio.emit(
+            "question",
+            {
+                "text": question,
+                "options": options,
+                "number": index + 1,
+                "total": len(questions),
+                "duration": QUESTION_TIME,
+                "quiz_name": QUIZZES[room["quiz"]]["name"]
+            },
+            to=code
+        )
 
         socketio.sleep(QUESTION_TIME)
 
         room = rooms.get(code)
 
-        if not room or room["game_id"] != game_id:
+        if not room or room["token"] != token:
             return
 
-        # Calculate scores on the server so clients cannot choose their own points.
-        for sid, submitted in room["answers"].items():
-            if sid not in room["players"]:
-                continue
+        room["phase"] = "result"
 
-            if submitted["value"] == question["answer"]:
-                elapsed = submitted["elapsed"]
-                speed_bonus = max(
-                    0, int(500 * (QUESTION_TIME - elapsed) / QUESTION_TIME)
-                )
-                room["players"][sid]["score"] += 500 + speed_bonus
+        socketio.emit(
+            "result",
+            {
+                "correct": correct,
+                "correct_text": options[correct],
+                "ranking": get_players(room)
+            },
+            to=code
+        )
 
-        leaderboard = get_room(code)["players"]
-
-        socketio.emit("quiz_result", {
-            "correct_value": question["answer"],
-            "explanation": question["explanation"],
-            "leaderboard": leaderboard
-        }, to=code)
-
-        send_room_update(code)
         socketio.sleep(RESULT_TIME)
 
     room = rooms.get(code)
 
-    if not room or room["game_id"] != game_id:
+    if not room or room["token"] != token:
         return
 
     room["status"] = "finished"
-    leaderboard = get_room(code)["players"]
 
-    socketio.emit("game_finished", {
-        "leaderboard": leaderboard,
-        "message": "Quiz beendet! Hier ist die finale Rangliste."
-    }, to=code)
+    socketio.emit(
+        "finished",
+        {"ranking": get_players(room)},
+        to=code
+    )
 
-    send_room_update(code)
+    room_update(code)
 
 
-@socketio.on("submit_answer")
-def submit_answer(data):
+@socketio.on("answer")
+def answer(data):
     data = data or {}
-    code = str(data.get("code", "")).strip().upper()
-    value = str(data.get("value", "")).strip().upper()
 
-    room = rooms.get(code)
+    code = str(data.get("code", "")).upper()
+    room = valid_room(code)
 
-    if not room or request.sid not in room["players"]:
-        emit("error_message", {"message": "Du bist nicht in diesem Raum."})
+    if not room:
         return
 
-    if room["status"] != "started":
-        emit("error_message", {"message": "Es läuft gerade keine Frage."})
+    if room["status"] != "playing":
         return
 
-    index = room["question_index"]
-
-    if index < 0 or index >= len(QUESTIONS):
-        emit("error_message", {"message": "Es gibt gerade keine aktive Frage."})
-        return
-
-    if time.time() - room["question_started_at"] >= QUESTION_TIME:
-        emit("answer_received", {"message": "Die Zeit ist abgelaufen."})
+    if room["phase"] != "question":
         return
 
     if request.sid in room["answers"]:
-        emit("answer_received", {"message": "Du hast bereits geantwortet."})
         return
 
-    question_number = getattr(room, "unused", None)
-    # Find the current question from the server-side order stored below.
-    # The actual correct answer is only sent after the timer ends.
-    # Options are validated against the current question by value.
-    if value not in ("A", "B", "C", "D"):
-        emit("error_message", {"message": "Ungültige Antwort."})
+    try:
+        value = int(data.get("value"))
+    except (TypeError, ValueError):
         return
 
-    room["answers"][request.sid] = {
-        "value": value,
-        "elapsed": max(0, time.time() - room["question_started_at"])
-    }
+    if value not in range(4):
+        return
 
-    emit("answer_received", {"message": "Antwort gespeichert!"})
+    elapsed = time.time() - room["started_at"]
+
+    if elapsed >= QUESTION_TIME:
+        return
+
+    questions = room.get("current_questions")
+
+    if not questions:
+        return
+
+    correct = questions[room["index"]][2]
+
+    if value == correct:
+        points = 500 + int(
+            max(0, QUESTION_TIME - elapsed) * 25
+        )
+    else:
+        points = 0
+
+    room["answers"][request.sid] = value
+
+    room["players"][request.sid]["score"] += points
+
+    emit("answered", {"points": points})
+
+    socketio.emit(
+        "answer_count",
+        {
+            "count": len(room["answers"]),
+            "total": len(room["players"])
+        },
+        to=code
+    )
+
+    room_update(code)
+
+
+@socketio.on("again")
+def play_again(data):
+    code = str((data or {}).get("code", "")).upper()
+    room = valid_room(code)
+
+    if not room:
+        return
+
+    if request.sid != room["host"]:
+        return
+
+    if room["status"] != "finished":
+        return
+
+    room["status"] = "waiting"
+    room["phase"] = "idle"
+    room["token"] += 1
+
+    room_update(code)
 
 
 @socketio.on("disconnect")
 def disconnect():
-    sid = request.sid
-
     for code, room in list(rooms.items()):
-        if sid not in room["players"]:
+        if request.sid not in room["players"]:
             continue
 
-        del room["players"][sid]
-        room["answers"].pop(sid, None)
+        del room["players"][request.sid]
 
         if not room["players"]:
             del rooms[code]
-            continue
+        else:
+            if room["host"] == request.sid:
+                room["host"] = next(iter(room["players"]))
 
-        if sid == room["host"]:
-            room["host"] = next(iter(room["players"]))
+            room_update(code)
 
-        send_room_update(code)
+        break
 
 
 if __name__ == "__main__":
-    print("Class-Champion wird gestartet...")
+    print("Class-Champion läuft auf Port 5050!")
+
     socketio.run(
         app,
-        host="127.0.0.1",
-        port=5050,
-        debug=True,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5050)),
+        debug=False,
         allow_unsafe_werkzeug=True
     )

@@ -4,315 +4,1108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Class-Champion – Minecraft Quiz</title>
+<title>Class-Champion 🏆</title>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;padding:25px;font-family:Arial,sans-serif;color:white;background:radial-gradient(circle at top,#353080,#0b1024 65%);min-height:100vh}
-main{max-width:850px;margin:auto}
-h1{text-align:center;font-size:clamp(35px,7vw,58px)}
-h1 span{color:#b4a5ff}
-.sub{text-align:center;color:#c4c9e6;margin-bottom:30px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.panel{background:#ffffff0d;border:1px solid #ffffff22;border-radius:20px;padding:22px;margin-bottom:16px}
-input{width:100%;padding:14px;margin:8px 0;border-radius:10px;border:1px solid #41476a;background:#10162d;color:white;font-size:16px}
-button{width:100%;padding:14px;margin-top:8px;border:0;border-radius:10px;background:#7657ff;color:white;font-weight:bold;font-size:15px;cursor:pointer}
-button:hover{filter:brightness(1.15)}
-button:disabled{opacity:.55;cursor:not-allowed}
-.secondary{background:#242c4c}
-.hidden{display:none!important}
-#message{background:#252b4b;padding:14px;border-radius:10px;margin:15px 0}
-.code{font-size:32px;letter-spacing:6px;color:#c4b6ff;font-weight:bold}
-li{background:#ffffff0b;padding:12px;margin:8px 0;border-radius:9px}
-ul{padding-left:20px}
-.small{color:#bfc5e4;font-size:14px;line-height:1.5}
-.question{font-size:clamp(22px,4vw,32px);line-height:1.35;margin:24px 0}
-.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.answer{min-height:70px;background:#29274d;border:1px solid #6558a4;text-align:left}
-.answer.selected{background:#5a4c9c}
-.answer.correct{background:#237a49}
-.answer.wrong{background:#a13d52}
-.stats{display:flex;justify-content:space-between;gap:12px;color:#d4d0ff}
-.timer{height:12px;background:#17152b;border-radius:10px;overflow:hidden;margin:15px 0}
-#timerBar{height:100%;width:100%;background:#a79aff}
-.leader-row{display:flex;justify-content:space-between;gap:12px;padding:12px;border-bottom:1px solid #ffffff22}
-.points{color:#b4ffa9;font-weight:bold}
-#explanation{background:#252b4b;padding:14px;border-radius:10px;line-height:1.5;margin-top:16px}
-@media(max-width:600px){.grid,.answers{grid-template-columns:1fr}body{padding:15px}.panel{padding:17px}}
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(
+        circle at top,
+        #3a2574,
+        #100b26 65%
+    );
+    color: #f9f6ff;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+main {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: clamp(32px, 6vw, 55px);
+}
+
+h1 span {
+    color: #b9a3ff;
+}
+
+.sub {
+    text-align: center;
+    color: #c9c1e4;
+}
+
+.panel {
+    background: #ffffff0c;
+    border: 1px solid #ffffff26;
+    border-radius: 20px;
+    padding: 22px;
+    margin: 16px 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 13px;
+    background: #120e2d;
+    border: 1px solid #66538c;
+    color: white;
+    border-radius: 10px;
+    font-size: 16px;
+    margin: 7px 0 13px;
+}
+
+button {
+    background: #7657ff;
+    border: 0;
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 13px;
+    cursor: pointer;
+}
+
+button:hover {
+    filter: brightness(1.15);
+}
+
+button:disabled {
+    opacity: 0.55;
+}
+
+.wide {
+    width: 100%;
+}
+
+.secondary {
+    background: #332a56;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.muted {
+    color: #c9c1e4;
+    font-size: 14px;
+}
+
+/* Profil-Editor */
+
+.emoji-list {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+.emoji {
+    background: #2e2455;
+    font-size: 23px;
+    padding: 8px;
+}
+
+.emoji.active {
+    outline: 2px solid #e5caff;
+    background: #584184;
+}
+
+.avatar {
+    width: 64px;
+    height: 64px;
+    border: 3px solid var(--color, #8b5cf6);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    overflow: hidden;
+    flex-shrink: 0;
+    overflow-wrap: anywhere;
+    text-align: center;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #20183e;
+    padding: 13px;
+    border-radius: 14px;
+}
+
+/* Multiplayer-Lobby */
+
+.players {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(190px, 1fr)
+    );
+    gap: 10px;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: #1a1536;
+    padding: 9px;
+    border-radius: 12px;
+    min-width: 0;
+}
+
+.player .avatar {
+    width: 47px;
+    height: 47px;
+    font-size: 18px;
+}
+
+.player strong {
+    overflow-wrap: anywhere;
+}
+
+.code {
+    font-size: 33px;
+    letter-spacing: 6px;
+    color: #d6c6ff;
+    font-weight: 900;
+}
+
+/* Quiz */
+
+.answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.answer {
+    min-height: 80px;
+    text-align: left;
+    background: #392d68;
+    border: 1px solid #6d5d9c;
+}
+
+.answer.correct {
+    background: #176746;
+}
+
+.answer.wrong {
+    background: #88334d;
+}
+
+.bar {
+    height: 12px;
+    background: #2a214c;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.bar div {
+    height: 100%;
+    width: 100%;
+    background: #b9a3ff;
+}
+
+/* Ranglisten */
+
+.ranking-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 11px;
+    border-bottom: 1px solid #ffffff20;
+}
+
+.ranking-row .profile {
+    background: transparent;
+    padding: 0;
+    min-width: 0;
+}
+
+.ranking-row .avatar {
+    width: 43px;
+    height: 43px;
+    font-size: 17px;
+}
+
+.ranking-row strong {
+    overflow-wrap: anywhere;
+}
+
+/* Gewinner-Animation */
+
+.winner {
+    text-align: center;
+    font-size: clamp(25px, 5vw, 43px);
+    color: #ffe48d;
+    font-weight: 900;
+}
+
+.trophy {
+    font-size: 85px;
+    animation: bounce 1s infinite;
+    text-align: center;
+}
+
+@keyframes bounce {
+    50% {
+        transform: translateY(-15px) rotate(8deg);
+    }
+}
+
+.confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.piece {
+    position: absolute;
+    top: -30px;
+    width: 10px;
+    height: 16px;
+    animation: fall 4s linear forwards;
+}
+
+@keyframes fall {
+    to {
+        top: 110vh;
+        transform: rotate(900deg) translateX(80px);
+    }
+}
+
+@media (max-width: 600px) {
+    .grid,
+    .answer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    main {
+        padding: 12px;
+    }
+}
 </style>
 </head>
+
 <body>
 <main>
-<h1>🏆 Class-<span>Champion</span></h1>
-<p class="sub">⛏ Deine Klasse. Dein Quiz. Dein Sieg.</p>
 
-<section id="home" class="grid">
-<div class="panel">
-<h2>🌍 Raum erstellen</h2>
-<p class="small">Erstelle einen Raum und werde Spielleiter.</p>
-<form id="createForm">
-<input id="createName" maxlength="20" placeholder="Dein Spielername" required>
-<button>Raum erstellen</button>
-</form>
-</div>
-<div class="panel">
-<h2>🎮 Raum beitreten</h2>
-<p class="small">Gib den Code deines Spielleiters ein.</p>
-<form id="joinForm">
-<input id="joinName" maxlength="20" placeholder="Dein Spielername" required>
-<input id="joinCode" maxlength="5" placeholder="Raumcode" required>
-<button>Beitreten</button>
-</form>
-</div>
+<h1>🏆 Class-<span>Champion</span></h1>
+<p class="sub">
+    Deine Klasse. Dein Quiz. Dein Sieg. 💜
+</p>
+
+<!-- STARTSEITE -->
+
+<section id="home">
+
+    <div class="panel">
+        <h2>🎨 Dein Spielerprofil</h2>
+
+        <div class="grid">
+
+            <div>
+                <label for="name">Spielername</label>
+                <input
+                    id="name"
+                    maxlength="20"
+                    placeholder="Dein Name"
+                >
+
+                <p>Wähle mehrere Emojis:</p>
+                <div id="emojiList" class="emoji-list"></div>
+
+                <label for="customEmoji">Eigene Emojis</label>
+                <input
+                    id="customEmoji"
+                    placeholder="z. B. 🐲🌟"
+                >
+
+                <label for="imageUpload">Profilbild hochladen</label>
+                <input
+                    type="file"
+                    id="imageUpload"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                >
+
+                <button id="clearImage" class="secondary">
+                    Bild entfernen
+                </button>
+
+                <label for="color">Profilfarbe</label>
+                <input
+                    id="color"
+                    type="color"
+                    value="#8b5cf6"
+                >
+
+                <label for="hex">Farbcode</label>
+                <input
+                    id="hex"
+                    value="#8B5CF6"
+                    maxlength="7"
+                >
+            </div>
+
+            <div>
+                <h3>👀 Live-Vorschau</h3>
+
+                <div class="profile">
+                    <div id="previewAvatar" class="avatar">
+                        😎
+                    </div>
+                    <strong id="previewName">
+                        Champion
+                    </strong>
+                </div>
+
+                <p class="muted">
+                    Deine Emojis, deine Farbe und dein Profilbild
+                    erscheinen in der Lobby und Rangliste.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <div class="panel">
+            <h2>🚀 Raum erstellen</h2>
+            <button id="create" class="wide">
+                Raum erstellen
+            </button>
+        </div>
+
+        <div class="panel">
+            <h2>🎮 Raum beitreten</h2>
+            <input
+                id="joinCode"
+                maxlength="5"
+                placeholder="Raumcode"
+            >
+            <button id="join" class="wide">
+                Beitreten
+            </button>
+        </div>
+
+    </div>
+
 </section>
 
-<div id="message" class="hidden" role="status"></div>
+<!-- MULTIPLAYER-LOBBY -->
 
 <section id="lobby" class="panel hidden">
-<h2>👥 Multiplayer-Lobby</h2>
-<p class="small">DEIN RAUMCODE</p>
-<div class="code" id="codeDisplay"></div>
-<button id="copyButton" class="secondary">Code kopieren</button>
-<p class="small">Teile den Code mit deinen Mitschülern.</p>
-<h3>Spieler: <span id="count">0</span>/50</h3>
-<ul id="players"></ul>
-<button id="startButton" class="hidden">⚔️ Minecraft-Quiz starten</button>
-<p id="waiting" class="small">Warte auf den Spielleiter ...</p>
+    <h2>👥 Multiplayer-Lobby</h2>
+
+    <p>Dein Raumcode</p>
+    <div id="roomCode" class="code"></div>
+
+    <button id="copy" class="secondary">
+        📋 Kopieren
+    </button>
+
+    <h3>
+        Spieler: <span id="count">0</span>/50
+    </h3>
+
+    <div id="players" class="players"></div>
+
+    <div id="hostPanel">
+        <h3>🧠 Quiz auswählen</h3>
+
+        <select id="quizSelect">
+            <option value="minecraft">
+                ⛏️ Minecraft-Wissen
+            </option>
+            <option value="wissen">
+                🧠 Allgemeinwissen
+            </option>
+        </select>
+
+        <button id="start" class="wide">
+            ⚔️ Quiz starten
+        </button>
+    </div>
+
+    <p id="guestText" class="muted hidden">
+        Warte auf den Spielleiter …
+    </p>
+
+    <button
+        id="leave"
+        class="secondary"
+        style="margin-top:16px"
+    >
+        Zur Startseite
+    </button>
 </section>
+
+<!-- QUIZ -->
 
 <section id="quiz" class="panel hidden">
-<div class="stats">
-<span id="questionNumber">Frage 1 von 10</span>
-<span>⏱ <strong id="timerText">15</strong> Sekunden</span>
-</div>
-<div class="timer"><div id="timerBar"></div></div>
-<h2>⛏ Minecraft-Wissen</h2>
-<div id="questionText" class="question"></div>
-<div id="answers" class="answers"></div>
-<p id="answerStatus" class="small" role="status"></p>
-<div id="explanation" class="hidden"></div>
+
+    <p id="questionCount"></p>
+    <h2 id="quizTitle"></h2>
+
+    <div class="bar">
+        <div id="timerBar"></div>
+    </div>
+
+    <p>
+        ⏱ <strong id="timerText">15</strong> Sekunden
+    </p>
+
+    <h2 id="questionText"></h2>
+
+    <div id="answers" class="answer-grid"></div>
+
+    <p id="answerInfo" class="muted"></p>
+
+    <div id="resultInfo" class="panel hidden"></div>
+
+    <h3>🏅 Live-Rangliste</h3>
+    <div id="liveRanking"></div>
+
 </section>
 
-<section id="scorePanel" class="panel hidden">
-<h2>🏆 Rangliste</h2>
-<div id="leaderboard"></div>
-<p class="small" id="scoreMessage"></p>
-</section>
+<!-- SPIELENDE -->
 
 <section id="finished" class="panel hidden">
-<h2>🏆 Quiz beendet!</h2>
-<p id="winner"></p>
-<h3>Endergebnis</h3>
-<div id="finalScores"></div>
-<button id="backButton" class="secondary">Zurück zur Startseite</button>
+
+    <div class="trophy">🏆</div>
+
+    <h2 class="winner" id="winner"></h2>
+
+    <p style="text-align:center">
+        🎉 Herzlichen Glückwunsch! 🎉
+    </p>
+
+    <h3>🥇 Endgültige Rangliste</h3>
+
+    <div id="finalRanking"></div>
+
+    <button id="again" class="wide">
+        🔁 Neue Runde
+    </button>
+
+    <button
+        id="back"
+        class="secondary wide"
+        style="margin-top:10px"
+    >
+        Startseite
+    </button>
+
 </section>
+
+<div id="message" class="panel hidden" role="status"></div>
+
 </main>
+
+<div class="confetti" id="confetti"></div>
 
 <script>
 const socket = io();
+
 const $ = id => document.getElementById(id);
 
-let roomCode = "";
-let myName = "";
+let code = "";
+let myId = "";
 let isHost = false;
-let hasAnswered = false;
-let selectedValue = null;
-let timerInterval = null;
-let questionData = null;
-let lastQuestionNumber = 0;
 
-function show(panel) {
-    ["home","lobby","quiz","scorePanel","finished"].forEach(id =>
-        $(id).classList.add("hidden")
+let selected = ["😎"];
+let uploaded = "";
+
+let timer = null;
+let answered = false;
+let lastChoice = -1;
+
+const suggestions = [
+    "😎", "😀", "🤖", "👑",
+    "🔥", "⚡", "🎮", "🐉",
+    "💎", "🐼", "👽", "🚀",
+    "🦊", "🐺", "🌈", "🏆",
+    "🥷", "🦄"
+];
+
+function esc(value) {
+    return String(value ?? "").replace(
+        /[&<>"']/g,
+        char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]
     );
-    $(panel).classList.remove("hidden");
+}
+
+// SPIELERPROFIL
+
+function profile() {
+    return {
+        emojis:
+            (selected.join("") + $("customEmoji").value).slice(0, 24)
+            || "😎",
+
+        color: $("color").value,
+        image: uploaded
+    };
+}
+
+function avatar(player) {
+    const color = /^#[0-9a-fA-F]{6}$/.test(player.color || "")
+        ? player.color
+        : "#8B5CF6";
+
+    const image = typeof player.image === "string"
+        && player.image.startsWith("data:image/jpeg;base64,")
+        ? player.image
+        : "";
+
+    return `
+        <div class="avatar" style="--color:${color}">
+            ${
+                image
+                    ? `<img src="${image}" alt="Profilbild">`
+                    : esc(player.emojis || "😎")
+            }
+        </div>
+    `;
+}
+
+function preview() {
+    const current = profile();
+
+    $("previewAvatar").style.setProperty(
+        "--color",
+        current.color
+    );
+
+    $("previewAvatar").replaceChildren();
+
+    if (current.image) {
+        const img = document.createElement("img");
+        img.src = current.image;
+        img.alt = "Vorschau";
+        $("previewAvatar").appendChild(img);
+    } else {
+        $("previewAvatar").textContent = current.emojis;
+    }
+
+    $("previewName").textContent =
+        $("name").value.trim() || "Champion";
+}
+
+// MEHRERE EMOJIS AUSWÄHLEN
+
+function renderEmojis() {
+    $("emojiList").replaceChildren();
+
+    suggestions.forEach(emoji => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className =
+            "emoji" + (selected.includes(emoji) ? " active" : "");
+
+        button.textContent = emoji;
+
+        button.onclick = () => {
+            if (selected.includes(emoji)) {
+                selected = selected.filter(
+                    item => item !== emoji
+                );
+            } else {
+                selected.push(emoji);
+            }
+
+            renderEmojis();
+            preview();
+        };
+
+        $("emojiList").appendChild(button);
+    });
+}
+
+$("name").oninput = preview;
+$("customEmoji").oninput = preview;
+
+$("color").oninput = () => {
+    $("hex").value = $("color").value.toUpperCase();
+    preview();
+};
+
+$("hex").onchange = () => {
+    if (/^#[0-9a-f]{6}$/i.test($("hex").value)) {
+        $("color").value = $("hex").value;
+        preview();
+    } else {
+        $("hex").value = $("color").value;
+    }
+};
+
+$("clearImage").onclick = () => {
+    uploaded = "";
+    $("imageUpload").value = "";
+    preview();
+};
+
+// BILD HOCHLADEN UND VERKLEINERN
+
+$("imageUpload").onchange = event => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type)) {
+        message("Bitte ein PNG-, JPG-, WEBP- oder GIF-Bild auswählen.");
+        return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+        message("Das Bild darf höchstens 10 MB groß sein.");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        const img = new Image();
+
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+
+            const scale = Math.min(
+                1,
+                180 / img.width,
+                180 / img.height
+            );
+
+            canvas.width = Math.max(
+                1,
+                Math.round(img.width * scale)
+            );
+
+            canvas.height = Math.max(
+                1,
+                Math.round(img.height * scale)
+            );
+
+            canvas.getContext("2d").drawImage(
+                img,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            const result = canvas.toDataURL(
+                "image/jpeg",
+                0.65
+            );
+
+            if (result.length > 180000) {
+                message("Das Bild ist zu groß. Bitte wähle ein anderes.");
+                return;
+            }
+
+            uploaded = result;
+            preview();
+        };
+
+        img.onerror = () => message("Bild konnte nicht gelesen werden.");
+        img.src = reader.result;
+    };
+
+    reader.readAsDataURL(file);
+};
+
+// SEITEN WECHSELN
+
+function show(id) {
+    ["home", "lobby", "quiz", "finished"].forEach(
+        item => {
+            $(item).classList.toggle(
+                "hidden",
+                item !== id
+            );
+        }
+    );
+
+    window.scrollTo(0, 0);
 }
 
 function message(text) {
     $("message").textContent = text;
     $("message").classList.remove("hidden");
+
+    setTimeout(() => {
+        $("message").classList.add("hidden");
+    }, 4000);
 }
 
-function renderPlayers(players) {
-    $("players").replaceChildren();
-    players.forEach(player => {
-        const li = document.createElement("li");
-        li.textContent = player.name + (player.is_host ? " 👑 Spielleiter" : "");
-        $("players").appendChild(li);
+function getName() {
+    return $("name").value.trim() || "Champion";
+}
+
+// RAUM ERSTELLEN UND BEITRETEN
+
+$("create").onclick = () => {
+    socket.emit("create_room", {
+        name: getName(),
+        profile: profile()
     });
-}
+};
 
-function renderScores(players, targetId) {
-    const target = $(targetId);
-    target.replaceChildren();
-    players.forEach((player,index) => {
-        const row = document.createElement("div");
-        row.className = "leader-row";
-
-        const name = document.createElement("span");
-        name.textContent = `${["🥇","🥈","🥉"][index] || "#" + (index+1)} ${player.name}`;
-
-        const score = document.createElement("span");
-        score.className = "points";
-        score.textContent = `${player.score || 0} Punkte`;
-
-        row.append(name,score);
-        target.appendChild(row);
+$("join").onclick = () => {
+    socket.emit("join_room", {
+        code: $("joinCode").value.toUpperCase().trim(),
+        name: getName(),
+        profile: profile()
     });
+};
+
+$("joinCode").oninput = () => {
+    $("joinCode").value = $("joinCode").value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+};
+
+// RANGLISTEN
+
+function ranking(players, targetId) {
+    $(targetId).innerHTML = players.map(
+        (player, index) => `
+            <div class="ranking-row">
+                <div class="profile">
+                    <strong>
+                        ${
+                            ["🥇", "🥈", "🥉"][index]
+                            || "#" + (index + 1)
+                        }
+                    </strong>
+
+                    ${avatar(player)}
+
+                    <strong>${esc(player.name)}</strong>
+                </div>
+
+                <strong>${player.score} Pkt.</strong>
+            </div>
+        `
+    ).join("");
 }
 
-function renderRoom(room) {
-    roomCode = room.code;
-    isHost = room.players.some(p => p.name === myName && p.is_host);
-    $("codeDisplay").textContent = room.code;
+// LOBBY-EVENTS
+
+socket.on("joined", data => {
+    code = data.code;
+    myId = socket.id;
+
+    $("roomCode").textContent = code;
+
+    show("lobby");
+});
+
+socket.on("room_updated", room => {
+    if (room.code !== code) return;
+
+    isHost = room.players.some(
+        player =>
+            player.id === socket.id
+            && player.host
+    );
+
+    $("hostPanel").classList.toggle(
+        "hidden",
+        !isHost
+    );
+
+    $("guestText").classList.toggle(
+        "hidden",
+        isHost
+    );
+
     $("count").textContent = room.players.length;
-    renderPlayers(room.players);
-    $("startButton").classList.toggle("hidden", !isHost || room.status !== "waiting");
-    $("waiting").classList.toggle("hidden", isHost || room.status !== "waiting");
-    $("message").classList.add("hidden");
-    if (room.status === "waiting") show("lobby");
-}
+    $("quizSelect").value = room.quiz;
 
-$("createForm").addEventListener("submit", event => {
-    event.preventDefault();
-    myName = $("createName").value.trim();
-    socket.emit("create_room",{name:myName});
+    $("players").innerHTML = room.players.map(
+        player => `
+            <div class="player">
+                ${avatar(player)}
+
+                <div>
+                    <strong>${esc(player.name)}</strong>
+                    <br>
+                    <small>
+                        ${player.host ? "👑 Host" : "🎮 Spieler"}
+                    </small>
+                </div>
+            </div>
+        `
+    ).join("");
+
+    ranking(room.players, "liveRanking");
+
+    if (room.status === "waiting") {
+        show("lobby");
+    }
 });
 
-$("joinForm").addEventListener("submit", event => {
-    event.preventDefault();
-    myName = $("joinName").value.trim();
-    socket.emit("join_room",{
-        name:myName,
-        code:$("joinCode").value.trim().toUpperCase()
+$("quizSelect").onchange = () => {
+    socket.emit("select_quiz", {
+        code: code,
+        quiz: $("quizSelect").value
     });
-});
+};
 
-$("joinCode").addEventListener("input", event => {
-    event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5);
-});
+$("start").onclick = () => {
+    socket.emit("start_game", {
+        code: code
+    });
+};
 
-socket.on("room_joined", data => {
-    renderRoom(data.room);
-    message(data.message || "Verbunden!");
-});
-
-socket.on("room_updated", data => {
-    if (data.room && data.room.code === roomCode) {
-        if (data.room.status === "waiting") renderRoom(data.room);
-        renderScores(data.room.players,"leaderboard");
-    }
-});
-
-socket.on("error_message", data => message(data.message || "Fehler"));
-
-$("startButton").addEventListener("click", () => {
-    socket.emit("start_game",{code:roomCode});
-});
-
-$("copyButton").addEventListener("click", async () => {
+$("copy").onclick = async () => {
     try {
-        await navigator.clipboard.writeText(roomCode);
-        $("copyButton").textContent = "Code kopiert ✓";
+        await navigator.clipboard.writeText(code);
+        message("Code kopiert!");
     } catch {
-        message("Dein Raumcode: " + roomCode);
+        message("Dein Code: " + code);
     }
-});
+};
 
-socket.on("quiz_question", data => {
-    questionData = data;
-    hasAnswered = false;
-    selectedValue = null;
-    lastQuestionNumber = data.number;
-    clearInterval(timerInterval);
+$("leave").onclick = () => location.reload();
+$("back").onclick = () => location.reload();
+
+$("again").onclick = () => {
+    if (isHost) {
+        socket.emit("again", {code: code});
+    } else {
+        message("Der Host startet die nächste Runde.");
+    }
+};
+
+// QUIZ-FRAGEN
+
+socket.on("question", data => {
     show("quiz");
 
-    $("questionNumber").textContent = `Frage ${data.number} von ${data.total}`;
-    $("questionText").textContent = data.question;
-    $("answerStatus").textContent = "";
-    $("explanation").classList.add("hidden");
-    $("explanation").textContent = "";
-    $("timerBar").style.width = "100%";
-    $("timerBar").style.background = "#a79aff";
+    answered = false;
+    lastChoice = -1;
 
+    $("quizTitle").textContent = data.quiz_name;
+
+    $("questionCount").textContent =
+        `Frage ${data.number} von ${data.total}`;
+
+    $("questionText").textContent = data.text;
+    $("answerInfo").textContent = "";
+
+    $("resultInfo").classList.add("hidden");
     $("answers").replaceChildren();
-    data.options.forEach(option => {
+
+    data.options.forEach((option, index) => {
         const button = document.createElement("button");
+
         button.className = "answer";
-        button.textContent = option.label;
-        button.addEventListener("click", () => submitAnswer(option.value,button));
+        button.textContent =
+            "ABCD"[index] + ": " + option;
+
+        button.dataset.index = index;
+
+        button.onclick = () => {
+            if (answered) return;
+
+            answered = true;
+            lastChoice = index;
+
+            socket.emit("answer", {
+                code: code,
+                value: index
+            });
+
+            document.querySelectorAll(".answer").forEach(
+                item => item.disabled = true
+            );
+
+            $("answerInfo").textContent =
+                "Antwort gesendet!";
+        };
+
         $("answers").appendChild(button);
     });
 
-    let remaining = data.duration;
-    $("timerText").textContent = remaining;
+    clearInterval(timer);
 
-    timerInterval = setInterval(() => {
-        remaining = Math.max(0,remaining - 0.1);
-        $("timerText").textContent = Math.ceil(remaining);
-        $("timerBar").style.width = (remaining / data.duration * 100) + "%";
-        if (remaining <= 5) $("timerBar").style.background = "#ff7770";
-        if (remaining <= 0) clearInterval(timerInterval);
-    },100);
+    let remaining = data.duration;
+
+    $("timerText").textContent = remaining;
+    $("timerBar").style.width = "100%";
+
+    timer = setInterval(() => {
+        remaining = Math.max(
+            0,
+            remaining - 0.1
+        );
+
+        $("timerText").textContent =
+            Math.ceil(remaining);
+
+        $("timerBar").style.width =
+            (remaining / data.duration * 100) + "%";
+
+        if (remaining <= 0) {
+            clearInterval(timer);
+        }
+    }, 100);
 });
 
-function submitAnswer(value,button) {
-    if (hasAnswered || !questionData) return;
-    hasAnswered = true;
-    selectedValue = value;
-    document.querySelectorAll(".answer").forEach(b => b.disabled = true);
-    button.classList.add("selected");
-    $("answerStatus").textContent = "Antwort wird gesendet ...";
-    socket.emit("submit_answer",{code:roomCode,value:value});
+// PUNKTE UND AUSWERTUNG
+
+socket.on("answered", data => {
+    if (data.points > 0) {
+        $("answerInfo").textContent =
+            "✅ Richtig! +" + data.points + " Punkte";
+    } else {
+        $("answerInfo").textContent =
+            "Antwort gespeichert!";
+    }
+});
+
+socket.on("answer_count", data => {
+    $("answerInfo").textContent =
+        `${data.count}/${data.total} Antworten eingegangen`;
+});
+
+socket.on("result", data => {
+    clearInterval(timer);
+
+    document.querySelectorAll(".answer").forEach(
+        button => {
+            button.disabled = true;
+
+            const index = Number(
+                button.dataset.index
+            );
+
+            if (index === data.correct) {
+                button.classList.add("correct");
+            } else if (index === lastChoice) {
+                button.classList.add("wrong");
+            }
+        }
+    );
+
+    $("resultInfo").classList.remove("hidden");
+
+    $("resultInfo").textContent =
+        "Richtige Antwort: "
+        + data.correct_text
+        + ". Nächste Frage gleich …";
+
+    ranking(data.ranking, "liveRanking");
+});
+
+// KONFETTI-ANIMATION
+
+function confetti() {
+    const container = $("confetti");
+    container.replaceChildren();
+
+    const colors = [
+        "#ffd700",
+        "#a78bfa",
+        "#ff69b4",
+        "#22c55e"
+    ];
+
+    for (let i = 0; i < 90; i++) {
+        const piece = document.createElement("div");
+
+        piece.className = "piece";
+
+        piece.style.left =
+            Math.random() * 100 + "%";
+
+        piece.style.background =
+            colors[i % colors.length];
+
+        piece.style.animationDelay =
+            Math.random() * 2 + "s";
+
+        container.appendChild(piece);
+    }
+
+    setTimeout(() => {
+        container.replaceChildren();
+    }, 6500);
 }
 
-socket.on("answer_received", data => {
-    $("answerStatus").textContent = data.message || "Antwort gespeichert!";
-});
+// SPIELENDE
 
-socket.on("quiz_result", data => {
-    clearInterval(timerInterval);
-    show("quiz");
-
-    document.querySelectorAll(".answer").forEach(button => {
-        button.disabled = true;
-        const option = questionData.options.find(o => o.text === button.textContent);
-        if (option && option.value === data.correct_value) {
-            button.classList.add("correct");
-        } else if (option && option.value === selectedValue) {
-            button.classList.add("wrong");
-        }
-    });
-
-    $("timerText").textContent = "0";
-    $("timerBar").style.width = "0%";
-    $("explanation").classList.remove("hidden");
-    $("explanation").textContent =
-        `Richtige Antwort: ${data.correct_text}. ${data.explanation || ""}`;
-    $("answerStatus").textContent = hasAnswered ? "Antwort ausgewertet!" : "Zeit abgelaufen!";
-
-    renderScores(data.leaderboard || [],"leaderboard");
-    $("scoreMessage").textContent = "Die nächste Frage kommt gleich ...";
-    $("scorePanel").classList.remove("hidden");
-});
-
-socket.on("game_finished", data => {
-    clearInterval(timerInterval);
+socket.on("finished", data => {
+    clearInterval(timer);
     show("finished");
-    renderScores(data.leaderboard || [],"finalScores");
-    const players = data.leaderboard || [];
-    $("winner").textContent = players.length
-        ? `Glückwunsch an ${players[0].name} mit ${players[0].score || 0} Punkten!`
-        : "Gut gespielt!";
+
+    $("winner").textContent = data.ranking.length
+        ? "🏆 " + data.ranking[0].name + " gewinnt!"
+        : "Quiz beendet";
+
+    ranking(data.ranking, "finalRanking");
+
+    $("again").classList.toggle(
+        "hidden",
+        !isHost
+    );
+
+    confetti();
 });
 
-$("backButton").addEventListener("click", () => location.reload());
+// FEHLER UND VERBINDUNG
 
-socket.on("connect_error", () => {
-    message("Verbindung fehlgeschlagen. Lade die Seite neu.");
+socket.on("app_error", data => {
+    message(data.message);
 });
+
+socket.on("disconnect", () => {
+    message("Verbindung getrennt. Bitte neu laden.");
+});
+
+// START
+
+renderEmojis();
+preview();
 </script>
+
 </body>
 </html>
-
-

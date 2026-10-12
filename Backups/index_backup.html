@@ -1,0 +1,611 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class-Champion – Quiz</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 25px;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: radial-gradient(circle at top, #353080, #0b1024 65%);
+    min-height: 100vh;
+}
+
+main { max-width: 850px; margin: auto; }
+
+h1 {
+    text-align: center;
+    font-size: clamp(35px, 7vw, 58px);
+}
+
+h1 span { color: #b4a5ff; }
+
+.sub {
+    text-align: center;
+    color: #c4c9e6;
+    margin-bottom: 30px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.panel {
+    background: #ffffff0d;
+    border: 1px solid #ffffff22;
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 16px;
+}
+
+input, select {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid #41476a;
+    background: #10162d;
+    color: white;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    border: 0;
+    border-radius: 10px;
+    background: #7657ff;
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:hover { filter: brightness(1.15); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.secondary { background: #242c4c; }
+.hidden { display: none !important; }
+
+#message {
+    background: #252b4b;
+    padding: 14px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.code {
+    font-size: 32px;
+    letter-spacing: 6px;
+    color: #c4b6ff;
+    font-weight: bold;
+}
+
+li {
+    background: #ffffff0b;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 9px;
+}
+
+ul { padding-left: 20px; }
+
+.small {
+    color: #bfc5e4;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.quiz-choice {
+    border: 1px solid #6558a4;
+    background: #191735;
+    border-radius: 14px;
+    padding: 16px;
+    margin: 12px 0;
+}
+
+.quiz-choice h3 { margin: 0 0 8px; }
+
+.quiz-name {
+    color: #c4b6ff;
+    font-weight: bold;
+}
+
+.question {
+    font-size: clamp(22px, 4vw, 32px);
+    line-height: 1.35;
+    margin: 24px 0;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.answer {
+    min-height: 70px;
+    background: #29274d;
+    border: 1px solid #6558a4;
+    text-align: left;
+}
+
+.answer.selected { background: #5a4c9c; }
+.answer.correct { background: #237a49; }
+.answer.wrong { background: #a13d52; }
+
+.stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #d4d0ff;
+}
+
+.timer {
+    height: 12px;
+    background: #17152b;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+
+#timerBar {
+    height: 100%;
+    width: 100%;
+    background: #a79aff;
+}
+
+.leader-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid #ffffff22;
+}
+
+.points { color: #b4ffa9; font-weight: bold; }
+
+#explanation {
+    background: #252b4b;
+    padding: 14px;
+    border-radius: 10px;
+    line-height: 1.5;
+    margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+    .grid, .answers { grid-template-columns: 1fr; }
+    body { padding: 15px; }
+    .panel { padding: 17px; }
+}
+</style>
+</head>
+
+<body>
+<main>
+    <h1>🏆 Class-<span>Champion</span></h1>
+    <p class="sub">⛏ Deine Klasse. Dein Quiz. Dein Sieg.</p>
+
+    <section id="home" class="grid">
+        <div class="panel">
+            <h2>🌍 Raum erstellen</h2>
+            <p class="small">Erstelle einen Raum und werde Spielleiter.</p>
+            <form id="createForm">
+                <input id="createName" maxlength="20"
+                       placeholder="Dein Spielername" required>
+                <button type="submit">Raum erstellen</button>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2>🎮 Raum beitreten</h2>
+            <p class="small">Gib den Code deines Spielleiters ein.</p>
+            <form id="joinForm">
+                <input id="joinName" maxlength="20"
+                       placeholder="Dein Spielername" required>
+                <input id="joinCode" maxlength="5"
+                       placeholder="Raumcode" required>
+                <button type="submit">Beitreten</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="message" class="hidden" role="status"></div>
+
+    <section id="lobby" class="panel hidden">
+        <h2>👥 Multiplayer-Lobby</h2>
+
+        <p class="small">DEIN RAUMCODE</p>
+        <div class="code" id="codeDisplay"></div>
+        <button id="copyButton" class="secondary">Code kopieren</button>
+        <p class="small">Teile den Code mit deinen Mitschülern.</p>
+
+        <h3>Spieler: <span id="count">0</span>/50</h3>
+        <ul id="players"></ul>
+
+        <div class="quiz-choice">
+            <h3>🧠 Quiz auswählen</h3>
+            <p class="small">
+                Der Spielleiter wählt das Quiz für alle Spieler im Raum.
+            </p>
+
+            <div id="hostQuizControls" class="hidden">
+                <label for="quizSelect">Verfügbares Quiz</label>
+                <select id="quizSelect"></select>
+                <p class="small" id="quizDescription"></p>
+            </div>
+
+            <div id="guestQuizInfo">
+                <p class="small">Ausgewähltes Quiz:</p>
+                <p class="quiz-name" id="selectedQuizName">
+                    Minecraft-Wissen
+                </p>
+                <p class="small" id="guestQuizDescription"></p>
+            </div>
+        </div>
+
+        <button id="startButton" class="hidden">
+            ⚔️ Quiz starten
+        </button>
+        <p id="waiting" class="small">
+            Warte auf den Spielleiter ...
+        </p>
+    </section>
+
+    <section id="quiz" class="panel hidden">
+        <div class="stats">
+            <span id="questionNumber">Frage 1 von 10</span>
+            <span>⏱ <strong id="timerText">15</strong> Sekunden</span>
+        </div>
+
+        <div class="timer"><div id="timerBar"></div></div>
+        <h2 id="quizTitle">⛏ Minecraft-Wissen</h2>
+        <div id="questionText" class="question"></div>
+        <div id="answers" class="answers"></div>
+        <p id="answerStatus" class="small" role="status"></p>
+        <div id="explanation" class="hidden"></div>
+    </section>
+
+    <section id="scorePanel" class="panel hidden">
+        <h2>🏆 Rangliste</h2>
+        <div id="leaderboard"></div>
+        <p class="small" id="scoreMessage"></p>
+    </section>
+
+    <section id="finished" class="panel hidden">
+        <h2>🏆 Quiz beendet!</h2>
+        <p id="winner"></p>
+        <h3>Endergebnis</h3>
+        <div id="finalScores"></div>
+        <button id="backButton" class="secondary">
+            Zurück zur Startseite
+        </button>
+    </section>
+</main>
+
+<script>
+const socket = io();
+const $ = id => document.getElementById(id);
+
+let roomCode = "";
+let myName = "";
+let isHost = false;
+let hasAnswered = false;
+let selectedValue = null;
+let timerInterval = null;
+let questionData = null;
+
+function show(panel) {
+    ["home", "lobby", "quiz", "scorePanel", "finished"].forEach(id => {
+        $(id).classList.add("hidden");
+    });
+    $(panel).classList.remove("hidden");
+}
+
+function message(text) {
+    $("message").textContent = text;
+    $("message").classList.remove("hidden");
+}
+
+function renderPlayers(players) {
+    $("players").replaceChildren();
+
+    players.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = player.name +
+            (player.is_host ? " 👑 Spielleiter" : "");
+        $("players").appendChild(li);
+    });
+}
+
+function renderScores(players, targetId) {
+    const target = $(targetId);
+    target.replaceChildren();
+
+    players.forEach((player, index) => {
+        const row = document.createElement("div");
+        row.className = "leader-row";
+
+        const name = document.createElement("span");
+        name.textContent =
+            `${["🥇", "🥈", "🥉"][index] || "#" + (index + 1)} ${player.name}`;
+
+        const score = document.createElement("span");
+        score.className = "points";
+        score.textContent = `${player.score || 0} Punkte`;
+
+        row.append(name, score);
+        target.appendChild(row);
+    });
+}
+
+function renderQuizSelection(room) {
+    const options = room.quiz_options || [];
+    const select = $("quizSelect");
+
+    $("hostQuizControls").classList.toggle("hidden", !isHost);
+    $("guestQuizInfo").classList.toggle("hidden", isHost);
+
+    if (isHost) {
+        const previousValue = room.selected_quiz;
+        select.replaceChildren();
+
+        options.forEach(quiz => {
+            const option = document.createElement("option");
+            option.value = quiz.value;
+            option.textContent = quiz.label;
+            select.appendChild(option);
+        });
+
+        select.value = previousValue || "minecraft";
+
+        const selected = options.find(q => q.value === select.value);
+        $("quizDescription").textContent =
+            selected ? selected.description : "";
+    } else {
+        $("selectedQuizName").textContent =
+            room.quiz_name || "Minecraft-Wissen";
+
+        const selected = options.find(
+            q => q.value === room.selected_quiz
+        );
+
+        $("guestQuizDescription").textContent =
+            selected ? selected.description : "";
+    }
+
+    $("startButton").textContent =
+        `⚔️ ${room.quiz_name || "Quiz"} starten`;
+}
+
+function renderRoom(room) {
+    roomCode = room.code;
+    isHost = room.players.some(
+        player => player.name === myName && player.is_host
+    );
+
+    $("codeDisplay").textContent = room.code;
+    $("count").textContent = room.players.length;
+
+    renderPlayers(room.players);
+    renderQuizSelection(room);
+
+    $("startButton").classList.toggle(
+        "hidden", !isHost || room.status !== "waiting"
+    );
+
+    $("waiting").classList.toggle(
+        "hidden", isHost || room.status !== "waiting"
+    );
+
+    $("message").classList.add("hidden");
+
+    if (room.status === "waiting") {
+        show("lobby");
+    }
+}
+
+$("createForm").addEventListener("submit", event => {
+    event.preventDefault();
+    myName = $("createName").value.trim();
+    socket.emit("create_room", {name: myName});
+});
+
+$("joinForm").addEventListener("submit", event => {
+    event.preventDefault();
+    myName = $("joinName").value.trim();
+
+    socket.emit("join_room", {
+        name: myName,
+        code: $("joinCode").value.trim().toUpperCase()
+    });
+});
+
+$("joinCode").addEventListener("input", event => {
+    event.target.value = event.target.value
+        .toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
+});
+
+socket.on("room_joined", data => {
+    renderRoom(data.room);
+    message(data.message || "Verbunden!");
+});
+
+socket.on("room_updated", data => {
+    if (data.room && data.room.code === roomCode) {
+        renderRoom(data.room);
+        renderScores(data.room.players, "leaderboard");
+    }
+});
+
+socket.on("error_message", data => {
+    message(data.message || "Fehler");
+});
+
+$("quizSelect").addEventListener("change", () => {
+    socket.emit("select_quiz", {
+        code: roomCode,
+        quiz: $("quizSelect").value
+    });
+});
+
+$("startButton").addEventListener("click", () => {
+    socket.emit("start_game", {code: roomCode});
+});
+
+$("copyButton").addEventListener("click", async () => {
+    try {
+        await navigator.clipboard.writeText(roomCode);
+        $("copyButton").textContent = "Code kopiert ✓";
+    } catch {
+        message("Dein Raumcode: " + roomCode);
+    }
+});
+
+socket.on("quiz_question", data => {
+    questionData = data;
+    hasAnswered = false;
+    selectedValue = null;
+
+    clearInterval(timerInterval);
+    show("quiz");
+
+    $("quizTitle").textContent = "⛏ " +
+        (data.quiz_name || "Minecraft-Wissen");
+
+    $("questionNumber").textContent =
+        `Frage ${data.number} von ${data.total}`;
+
+    $("questionText").textContent = data.question;
+    $("answerStatus").textContent = "";
+    $("explanation").classList.add("hidden");
+    $("explanation").textContent = "";
+    $("timerBar").style.width = "100%";
+    $("timerBar").style.background = "#a79aff";
+
+    $("answers").replaceChildren();
+
+    data.options.forEach(option => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.textContent = option.label;
+
+        button.addEventListener("click", () => {
+            submitAnswer(option.value, button);
+        });
+
+        $("answers").appendChild(button);
+    });
+
+    let remaining = data.duration;
+    $("timerText").textContent = remaining;
+
+    timerInterval = setInterval(() => {
+        remaining = Math.max(0, remaining - 0.1);
+        $("timerText").textContent = Math.ceil(remaining);
+
+        $("timerBar").style.width =
+            (remaining / data.duration * 100) + "%";
+
+        if (remaining <= 5) {
+            $("timerBar").style.background = "#ff7770";
+        }
+
+        if (remaining <= 0) {
+            clearInterval(timerInterval);
+        }
+    }, 100);
+});
+
+function submitAnswer(value, button) {
+    if (hasAnswered || !questionData) return;
+
+    hasAnswered = true;
+    selectedValue = value;
+
+    document.querySelectorAll(".answer").forEach(b => {
+        b.disabled = true;
+    });
+
+    button.classList.add("selected");
+    $("answerStatus").textContent = "Antwort wird gesendet ...";
+
+    socket.emit("submit_answer", {
+        code: roomCode,
+        value: value
+    });
+}
+
+socket.on("answer_received", data => {
+    $("answerStatus").textContent =
+        data.message || "Antwort gespeichert!";
+});
+
+socket.on("quiz_result", data => {
+    clearInterval(timerInterval);
+
+    const correctOption = questionData.options.find(
+        option => option.value === data.correct_value
+    );
+
+    document.querySelectorAll(".answer").forEach(button => {
+        button.disabled = true;
+
+        const option = questionData.options.find(
+            item => item.label === button.textContent
+        );
+
+        if (option && option.value === data.correct_value) {
+            button.classList.add("correct");
+        } else if (option && option.value === selectedValue) {
+            button.classList.add("wrong");
+        }
+    });
+
+    $("timerText").textContent = "0";
+    $("timerBar").style.width = "0%";
+
+    $("explanation").classList.remove("hidden");
+    $("explanation").textContent =
+        `Richtige Antwort: ${correctOption ? correctOption.label : data.correct_value}. ` +
+        (data.explanation || "");
+
+    $("answerStatus").textContent = hasAnswered
+        ? "Antwort ausgewertet!"
+        : "Zeit abgelaufen!";
+
+    renderScores(data.leaderboard || [], "leaderboard");
+    $("scoreMessage").textContent = "Die nächste Frage kommt gleich ...";
+    $("scorePanel").classList.remove("hidden");
+});
+
+socket.on("game_finished", data => {
+    clearInterval(timerInterval);
+    show("finished");
+
+    const players = data.leaderboard || [];
+    renderScores(players, "finalScores");
+
+    $("winner").textContent = players.length
+        ? `Glückwunsch an ${players[0].name} mit ${players[0].score || 0} Punkten!`
+        : "Gut gespielt!";
+});
+
+$("backButton").addEventListener("click", () => location.reload());
+
+socket.on("connect_error", () => {
+    message("Verbindung fehlgeschlagen. Lade die Seite neu.");
+});
+</script>
+</body>
+</html>
