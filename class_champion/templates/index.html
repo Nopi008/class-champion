@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class-Champion</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: white;
+            background:
+                radial-gradient(circle at top left, #4338ca, transparent 45%),
+                linear-gradient(135deg, #10152f, #19103c);
+        }
+
+        .card {
+            width: 100%;
+            max-width: 460px;
+            padding: 38px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 28px;
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 54px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 38px;
+            letter-spacing: -1.5px;
+        }
+
+        h1 span {
+            color: #a5b4fc;
+        }
+
+        .description {
+            color: #c6c8e2;
+            line-height: 1.6;
+            margin: 14px 0 28px;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 13px;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 13px;
+            background: rgba(8,12,35,0.6);
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #a5b4fc;
+        }
+
+        input::placeholder {
+            color: #a7a9c5;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 13px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.12);
+        }
+
+        .footer {
+            margin-top: 24px;
+            color: #a7a9c5;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="logo">🏆</div>
+        <h1>Class-<span>Champion</span></h1>
+        <p class="description">
+            Teste dein Wissen, fordere deine Klasse heraus
+            und werde Quiz-Champion!
+        </p>
+
+        <form id="join-form">
+            <input
+                id="player-name"
+                type="text"
+                placeholder="Dein Spielername"
+                maxlength="20"
+                required
+            >
+            <input
+                id="room-code"
+                type="text"
+                placeholder="Spielcode (später)"
+                maxlength="6"
+            >
+            <button type="submit">🚀 Quiz beitreten</button>
+        </form>
+
+        <p id="message" role="status"></p>
+        <div class="footer">Deine Klasse. Dein Wissen. Dein Sieg.</div>
+    </main>
+
+    <script>
+        document.getElementById("join-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("player-name").value.trim();
+
+            if (!name) {
+                document.getElementById("message").textContent =
+                    "Bitte gib einen Spielernamen ein.";
+                return;
+            }
+
+            document.getElementById("message").textContent =
+                "Hey " + name + "! Die Verbindung zum Quiz bauen wir als Nächstes.";
+        });
+    </script>
+</body>
+</html>
