@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class-Champion</title>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:25px;font-family:Arial,sans-serif;color:white;
+background:radial-gradient(circle at top,#353080,#0b1024 65%);min-height:100vh}
+main{max-width:850px;margin:auto}
+h1{text-align:center;font-size:clamp(35px,7vw,58px)}
+h1 span{color:#b4a5ff}
+.sub{text-align:center;color:#c4c9e6;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.panel{background:#ffffff0d;border:1px solid #ffffff22;border-radius:20px;padding:22px;margin-bottom:16px}
+input{width:100%;padding:14px;margin:8px 0;border-radius:10px;border:1px solid #41476a;background:#10162d;color:white;font-size:16px}
+button{width:100%;padding:14px;margin-top:8px;border:0;border-radius:10px;background:#7657ff;color:white;font-weight:bold;font-size:15px;cursor:pointer}
+.secondary{background:#242c4c}
+.hidden { display: none !important; }
+#message{background:#252b4b;padding:14px;border-radius:10px;margin:15px 0}
+.code{font-size:32px;letter-spacing:6px;color:#c4b6ff;font-weight:bold}
+li{background:#ffffff0b;padding:12px;margin:8px 0;border-radius:9px}
+ul{padding-left:20px}
+.small{color:#bfc5e4;font-size:14px;line-height:1.5}
+@media(max-width:600px){.grid{grid-template-columns:1fr}body{padding:15px}}
+</style>
+</head>
+<body>
+<main>
+<h1>🏆 Class-<span>Champion</span></h1>
+<p class="sub">Deine Klasse. Dein Quiz. Dein Sieg.</p>
+
+<section id="home" class="grid">
+<div class="panel">
+<h2>🚀 Raum erstellen</h2>
+<p class="small">Erstelle einen Raum und werde Spielleiter.</p>
+<form id="createForm">
+<input id="createName" maxlength="20" placeholder="Dein Spielername" required>
+<button>Raum erstellen</button>
+</form>
+</div>
+
+<div class="panel">
+<h2>🎮 Raum beitreten</h2>
+<p class="small">Gib den Code deines Spielleiters ein.</p>
+<form id="joinForm">
+<input id="joinName" maxlength="20" placeholder="Dein Spielername" required>
+<input id="joinCode" maxlength="5" placeholder="Raumcode" required>
+<button>Beitreten</button>
+</form>
+</div>
+</section>
+
+<div id="message" class="hidden" role="status"></div>
+
+<section id="lobby" class="panel hidden">
+<p class="small">DEIN RAUMCODE</p>
+<div class="code" id="codeDisplay"></div>
+<button id="copyButton" class="secondary">Code kopieren</button>
+<p class="small">Teile den Code mit deinen Mitschülern.</p>
+<h2>👥 Spieler: <span id="count">0</span>/50</h2>
+<ul id="players"></ul>
+<button id="startButton" class="hidden">Spiel starten (Test)</button>
+<div id="started" class="hidden"></div>
+<button id="backButton" class="secondary">Zurück</button>
+</section>
+</main>
+
+<script>
+const socket = io();
+const $ = id => document.getElementById(id);
+let roomCode = "";
+let myName = "";
+
+function message(text) {
+  $("message").textContent = text;
+  $("message").classList.remove("hidden");
+}
+
+function renderRoom(room) {
+  roomCode = room.code;
+  $("home").classList.add("hidden");
+  $("message").classList.add("hidden");
+  $("lobby").classList.remove("hidden");
+  $("codeDisplay").textContent = room.code;
+  $("count").textContent = room.players.length;
+  $("players").replaceChildren();
+
+  let host = false;
+  room.players.forEach(player => {
+    const li = document.createElement("li");
+    li.textContent = player.name + (player.is_host ? " 👑 Spielleiter" : "");
+    $("players").appendChild(li);
+    if (player.name === myName && player.is_host) host = true;
+  });
+
+  $("startButton").classList.toggle("hidden", !host || room.status === "started");
+}
+
+$("createForm").addEventListener("submit", event => {
+  event.preventDefault();
+  myName = $("createName").value.trim();
+  socket.emit("create_room", {name: myName});
+});
+
+$("joinForm").addEventListener("submit", event => {
+  event.preventDefault();
+  myName = $("joinName").value.trim();
+  socket.emit("join_room", {
+    name: myName,
+    code: $("joinCode").value.trim().toUpperCase()
+  });
+});
+
+socket.on("room_joined", data => {
+  renderRoom(data.room);
+  message(data.message);
+});
+
+socket.on("room_updated", data => {
+  if (data.room && data.room.code === roomCode) renderRoom(data.room);
+});
+
+socket.on("error_message", data => message(data.message));
+
+socket.on("game_started", data => {
+  $("started").textContent = data.message;
+  $("started").classList.remove("hidden");
+  $("startButton").classList.add("hidden");
+});
+
+$("startButton").addEventListener("click", () => {
+  socket.emit("start_game", {code: roomCode});
+});
+
+$("copyButton").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(roomCode);
+    $("copyButton").textContent = "Code kopiert ✓";
+  } catch {
+    message("Dein Raumcode ist: " + roomCode);
+  }
+});
+
+$("backButton").addEventListener("click", () => location.reload());
+</script>
+</body>
+</html>
+
