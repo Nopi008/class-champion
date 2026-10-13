@@ -2,3 +2,6 @@
 .idea/
 __pycache__/
 .DS_Store
+*.sqlite3
+*.sqlite3-journal
+.env

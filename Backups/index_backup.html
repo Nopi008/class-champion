@@ -4,608 +4,1643 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Class-Champion – Quiz</title>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<title>Class-Champion 🏆</title>
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    padding: 25px;
-    font-family: Arial, sans-serif;
-    color: white;
-    background: radial-gradient(circle at top, #353080, #0b1024 65%);
-    min-height: 100vh;
-}
-
-main { max-width: 850px; margin: auto; }
-
-h1 {
-    text-align: center;
-    font-size: clamp(35px, 7vw, 58px);
-}
-
-h1 span { color: #b4a5ff; }
-
-.sub {
-    text-align: center;
-    color: #c4c9e6;
-    margin-bottom: 30px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-
-.panel {
-    background: #ffffff0d;
-    border: 1px solid #ffffff22;
-    border-radius: 20px;
-    padding: 22px;
-    margin-bottom: 16px;
-}
-
-input, select {
-    width: 100%;
-    padding: 14px;
-    margin: 8px 0;
-    border-radius: 10px;
-    border: 1px solid #41476a;
-    background: #10162d;
-    color: white;
-    font-size: 16px;
-}
-
-button {
-    width: 100%;
-    padding: 14px;
-    margin-top: 8px;
-    border: 0;
-    border-radius: 10px;
-    background: #7657ff;
-    color: white;
-    font-weight: bold;
-    font-size: 15px;
-    cursor: pointer;
-}
-
-button:hover { filter: brightness(1.15); }
-button:disabled { opacity: .55; cursor: not-allowed; }
-.secondary { background: #242c4c; }
-.hidden { display: none !important; }
-
-#message {
-    background: #252b4b;
-    padding: 14px;
-    border-radius: 10px;
-    margin: 15px 0;
-}
-
-.code {
-    font-size: 32px;
-    letter-spacing: 6px;
-    color: #c4b6ff;
-    font-weight: bold;
-}
-
-li {
-    background: #ffffff0b;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 9px;
-}
-
-ul { padding-left: 20px; }
-
-.small {
-    color: #bfc5e4;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.quiz-choice {
-    border: 1px solid #6558a4;
-    background: #191735;
-    border-radius: 14px;
-    padding: 16px;
-    margin: 12px 0;
-}
-
-.quiz-choice h3 { margin: 0 0 8px; }
-
-.quiz-name {
-    color: #c4b6ff;
-    font-weight: bold;
-}
-
-.question {
-    font-size: clamp(22px, 4vw, 32px);
-    line-height: 1.35;
-    margin: 24px 0;
-}
-
-.answers {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.answer {
-    min-height: 70px;
-    background: #29274d;
-    border: 1px solid #6558a4;
-    text-align: left;
-}
-
-.answer.selected { background: #5a4c9c; }
-.answer.correct { background: #237a49; }
-.answer.wrong { background: #a13d52; }
-
-.stats {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    color: #d4d0ff;
-}
-
-.timer {
-    height: 12px;
-    background: #17152b;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 15px 0;
-}
-
-#timerBar {
-    height: 100%;
-    width: 100%;
-    background: #a79aff;
-}
-
-.leader-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px;
-    border-bottom: 1px solid #ffffff22;
-}
-
-.points { color: #b4ffa9; font-weight: bold; }
-
-#explanation {
-    background: #252b4b;
-    padding: 14px;
-    border-radius: 10px;
-    line-height: 1.5;
-    margin-top: 16px;
-}
-
-@media (max-width: 600px) {
-    .grid, .answers { grid-template-columns: 1fr; }
-    body { padding: 15px; }
-    .panel { padding: 17px; }
-}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#49358d,#100e29 75%);color:#faf7ff;font-family:Arial,sans-serif}
+main{max-width:1050px;margin:auto;padding:20px}
+h1{text-align:center;font-size:clamp(35px,6vw,60px);margin-bottom:5px}
+h1 span{color:#c2b4ff}
+.subtitle{text-align:center;color:#cbc3ed}
+.panel{background:#ffffff10;border:1px solid #ffffff25;border-radius:20px;padding:22px;margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+label{display:block;color:#e0d8ff;font-size:14px;margin-top:10px}
+input,textarea,select{display:block;width:100%;padding:12px;margin:7px 0 13px;color:white;background:#191535;border:1px solid #7667a5;border-radius:10px;font:inherit}
+input[type=color]{height:45px;padding:4px}
+input[type=checkbox],input[type=radio]{display:inline-block;width:auto;margin:0 8px 0 0}
+button{background:#795aff;color:white;border:0;border-radius:11px;padding:12px 16px;margin:5px;font-size:15px;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(1.12)}
+button:disabled{opacity:.45;cursor:default}
+.wide{display:block;width:100%;margin:8px 0}
+.secondary{background:#433765}
+.danger{background:#9c365d}
+.hidden{display:none!important}
+.muted{color:#c7bee2;font-size:14px}
+.row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.row>*{flex:1}
+.row button{flex:0 0 auto}
+.checkline{display:flex;align-items:center;gap:8px}
+.checkline input{margin:0}
+.emojis{display:flex;flex-wrap:wrap;gap:4px}
+.emoji{background:#352c57;padding:9px;font-size:24px}
+.emoji.active{outline:2px solid white;background:#7056ab}
+.avatar{--bg:#32215e;--border:#8b5cf6;width:65px;height:65px;border-radius:17px;border:3px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:25px;overflow:hidden;overflow-wrap:anywhere;flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.profile{display:flex;align-items:center;gap:12px;min-width:0}
+.profile strong{overflow-wrap:anywhere}
+.player-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.player{background:#ffffff0d;border-radius:12px;padding:12px}
+.player .avatar,.rank .avatar{width:46px;height:46px;font-size:18px}
+.room-code{text-align:center;color:#d9cdff;font-size:42px;letter-spacing:6px;font-weight:bold}
+.question-card{background:#29204b center/cover;border-radius:18px;padding:25px;margin:15px 0}
+.question-inner{background:#100c2edb;padding:20px;text-align:center;border-radius:14px}
+.question-inner h2{font-size:clamp(23px,5vw,34px)}
+.answer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{margin:0;min-height:78px;text-align:left;background:#403373;border:2px solid #7868b0}
+.answer.selected{background:#705fba;border-color:white}
+.timer-track{height:12px;border-radius:10px;background:#252045;overflow:hidden}
+.timer-fill{width:100%;height:100%;background:#b9a9ff}
+.rank{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #ffffff25;padding:12px}
+.rank .profile{flex:1}
+.points{color:#b8ffba;white-space:nowrap;font-weight:bold}
+.editor-question{border:1px solid #7763a4;border-radius:15px;background:#181431;padding:17px;margin:15px 0}
+.trophy{text-align:center;font-size:90px;animation:bounce 1s infinite}
+.winner{text-align:center;color:#ffe28a;font-size:clamp(28px,5vw,42px)}
+@keyframes bounce{50%{transform:translateY(-12px) rotate(8deg)}}
+@keyframes pop{from{opacity:.2;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.pop{animation:pop .5s ease-out}
+.confetti-area{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.confetti-piece{position:absolute;top:-30px;width:10px;height:15px;animation:fall 4s linear forwards}
+@keyframes fall{to{top:110vh;transform:rotate(900deg)}}
+#message{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);max-width:90%;padding:15px 20px;border-radius:12px;background:#57408c;box-shadow:0 7px 30px #0009;z-index:100}
+#connectionStatus{text-align:center;color:#ffdf9c;font-size:14px;margin:12px}
+@media(max-width:650px){.grid,.answer-grid{grid-template-columns:1fr}main{padding:10px}.panel{padding:15px}}
 </style>
 </head>
 
 <body>
 <main>
-    <h1>🏆 Class-<span>Champion</span></h1>
-    <p class="sub">⛏ Deine Klasse. Dein Quiz. Dein Sieg.</p>
+<h1>🏆 Class-<span>Champion</span></h1>
+<p class="subtitle">Deine Klasse. Dein Quiz. Dein Sieg. 💜</p>
+<div id="connectionStatus">🔄 Verbinde mit dem Server ...</div>
 
-    <section id="home" class="grid">
-        <div class="panel">
-            <h2>🌍 Raum erstellen</h2>
-            <p class="small">Erstelle einen Raum und werde Spielleiter.</p>
-            <form id="createForm">
-                <input id="createName" maxlength="20"
-                       placeholder="Dein Spielername" required>
-                <button type="submit">Raum erstellen</button>
-            </form>
-        </div>
+<!-- STARTSEITE -->
+<section id="home">
+<div class="panel">
+<h2>🎨 Dein Avatar</h2>
+<div class="grid">
+<div>
+<label>Dein Spielername
+<input id="playerName" maxlength="20" placeholder="Dein Name">
+</label>
 
-        <div class="panel">
-            <h2>🎮 Raum beitreten</h2>
-            <p class="small">Gib den Code deines Spielleiters ein.</p>
-            <form id="joinForm">
-                <input id="joinName" maxlength="20"
-                       placeholder="Dein Spielername" required>
-                <input id="joinCode" maxlength="5"
-                       placeholder="Raumcode" required>
-                <button type="submit">Beitreten</button>
-            </form>
-        </div>
-    </section>
+<label>Emojis auswählen</label>
+<div id="emojiList" class="emojis"></div>
 
-    <div id="message" class="hidden" role="status"></div>
+<label>Eigene Emojis
+<input id="customEmojis" maxlength="32" placeholder="🐉🌟">
+</label>
 
-    <section id="lobby" class="panel hidden">
-        <h2>👥 Multiplayer-Lobby</h2>
+<label>Profilbild hochladen
+<input type="file" id="avatarFile" accept="image/*">
+</label>
 
-        <p class="small">DEIN RAUMCODE</p>
-        <div class="code" id="codeDisplay"></div>
-        <button id="copyButton" class="secondary">Code kopieren</button>
-        <p class="small">Teile den Code mit deinen Mitschülern.</p>
+<button id="removeAvatar" class="secondary">Bild entfernen</button>
+</div>
 
-        <h3>Spieler: <span id="count">0</span>/50</h3>
-        <ul id="players"></ul>
+<div>
+<div class="grid">
+<label>Avatar-Hintergrundfarbe
+<input id="avatarBg" type="color" value="#32215e">
+</label>
 
-        <div class="quiz-choice">
-            <h3>🧠 Quiz auswählen</h3>
-            <p class="small">
-                Der Spielleiter wählt das Quiz für alle Spieler im Raum.
-            </p>
+<label>Avatar-Rahmenfarbe
+<input id="avatarBorder" type="color" value="#8b5cf6">
+</label>
+</div>
 
-            <div id="hostQuizControls" class="hidden">
-                <label for="quizSelect">Verfügbares Quiz</label>
-                <select id="quizSelect"></select>
-                <p class="small" id="quizDescription"></p>
-            </div>
+<h3>Live-Vorschau</h3>
+<div class="profile">
+<div id="avatarPreview" class="avatar">😎</div>
+<strong id="namePreview">Champion</strong>
+</div>
+<p class="muted">Die Website bleibt lila. Nur dein Avatar ändert seine Farben.</p>
+</div>
+</div>
+</div>
 
-            <div id="guestQuizInfo">
-                <p class="small">Ausgewähltes Quiz:</p>
-                <p class="quiz-name" id="selectedQuizName">
-                    Minecraft-Wissen
-                </p>
-                <p class="small" id="guestQuizDescription"></p>
-            </div>
-        </div>
+<div class="grid">
+<div class="panel">
+<h2>🚀 Raum erstellen</h2>
+<button id="createRoom" class="wide">Raum erstellen</button>
+</div>
+<div class="panel">
+<h2>🎮 Raum beitreten</h2>
+<input id="joinCode" maxlength="5" placeholder="5-stelliger Raumcode">
+<button id="joinRoom" class="wide">Raum beitreten</button>
+</div>
+</div>
 
-        <button id="startButton" class="hidden">
-            ⚔️ Quiz starten
-        </button>
-        <p id="waiting" class="small">
-            Warte auf den Spielleiter ...
-        </p>
-    </section>
+<div class="grid">
+<div class="panel">
+<h2>🛠️ Eigenes Quiz</h2>
+<p>Erstelle Fragen und reiche dein Quiz zur Freigabe ein.</p>
+<button id="openEditor" class="wide">Eigenes Quiz einreichen</button>
+</div>
+<div class="panel">
+<h2>💡 Ideen</h2>
+<p>Schlage Funktionen für Class-Champion vor.</p>
+<button id="openIdeas" class="wide">Idee vorschlagen</button>
+</div>
+</div>
 
-    <section id="quiz" class="panel hidden">
-        <div class="stats">
-            <span id="questionNumber">Frage 1 von 10</span>
-            <span>⏱ <strong id="timerText">15</strong> Sekunden</span>
-        </div>
+<button id="openAdmin" class="secondary">🔐 Admin-Bereich</button>
+</section>
 
-        <div class="timer"><div id="timerBar"></div></div>
-        <h2 id="quizTitle">⛏ Minecraft-Wissen</h2>
-        <div id="questionText" class="question"></div>
-        <div id="answers" class="answers"></div>
-        <p id="answerStatus" class="small" role="status"></p>
-        <div id="explanation" class="hidden"></div>
-    </section>
+<!-- IDEEN -->
+<section id="ideas" class="panel hidden">
+<h2>💡 Idee vorschlagen</h2>
+<label>Dein Name<input id="ideaName" maxlength="40"></label>
+<label>Deine Idee<textarea id="ideaText" rows="6" maxlength="2000"></textarea></label>
+<button id="sendIdea">Idee absenden</button>
+<button class="secondary homeButton">Zurück</button>
+</section>
 
-    <section id="scorePanel" class="panel hidden">
-        <h2>🏆 Rangliste</h2>
-        <div id="leaderboard"></div>
-        <p class="small" id="scoreMessage"></p>
-    </section>
+<!-- QUIZ-EDITOR -->
+<section id="editor" class="panel hidden">
+<h2>🛠️ Eigenes Quiz erstellen</h2>
+<p class="muted">Du kannst 1 bis 30 Fragen hinzufügen, verschiedene Fragetypen nutzen und Bilder hochladen.</p>
 
-    <section id="finished" class="panel hidden">
-        <h2>🏆 Quiz beendet!</h2>
-        <p id="winner"></p>
-        <h3>Endergebnis</h3>
-        <div id="finalScores"></div>
-        <button id="backButton" class="secondary">
-            Zurück zur Startseite
-        </button>
-    </section>
+<div class="grid">
+<label>Quizname
+<input id="quizTitle" maxlength="80" placeholder="Mein Super-Quiz">
+</label>
+
+<label>Kategorie
+<input id="quizCategory" maxlength="50" placeholder="Gaming">
+</label>
+
+<label>Beschreibung
+<textarea id="quizDescription" maxlength="300" rows="2"></textarea>
+</label>
+
+<label>Schwierigkeit
+<select id="quizDifficulty">
+<option>Leicht</option>
+<option selected>Mittel</option>
+<option>Schwer</option>
+</select>
+</label>
+
+<label>Fragen pro Runde
+<input id="perRound" type="number" min="1" max="30" value="1">
+</label>
+
+<label>Zwischenrangliste (Sekunden)
+<input id="rankingSeconds" type="number" min="2" max="15" value="5">
+</label>
+
+<label class="checkline">
+<input id="quizShuffle" type="checkbox" checked>
+Fragen zufällig mischen
+</label>
+
+<label>Quiz-Titelbild
+<input id="coverFile" type="file" accept="image/*">
+</label>
+</div>
+
+<div id="editorQuestions"></div>
+
+<button id="addQuestion">➕ Frage hinzufügen</button>
+<button id="previewQuiz" class="secondary">👀 Vorschau</button>
+<button id="submitQuiz">📩 Quiz einreichen</button>
+<button class="secondary homeButton">Zurück</button>
+
+<div id="quizPreview" class="panel hidden"></div>
+</section>
+
+<!-- ADMIN -->
+<section id="admin" class="panel hidden">
+<h2>🔐 Admin-Bereich</h2>
+
+<div id="adminLogin">
+<label>Admin-Passwort
+<input id="adminPassword" type="password">
+</label>
+<button id="adminLoginButton">Anmelden</button>
+</div>
+
+<div id="adminPanel" class="hidden">
+<button id="adminRefresh">Aktualisieren</button>
+<button id="adminLogout" class="secondary">Abmelden</button>
+<h3>🗑️ Papierkorb – eingereichte Quizze</h3>
+<p class="muted">
+    Neue Quizze landen zuerst hier.
+    Du kannst sie annehmen oder ablehnen.
+</p>
+<div id="adminQuizzes"></div>
+
+<h3>🗑️ Papierkorb – eingereichte Ideen</h3>
+<p class="muted">
+    Neue Ideen landen zuerst hier.
+</p>
+<div id="adminIdeas"></div>
+</div>
+
+<button class="secondary homeButton">Zurück</button>
+</section>
+
+<!-- LOBBY -->
+<section id="lobby" class="panel hidden">
+<h2>👥 Multiplayer-Lobby</h2>
+<p>Dein Raumcode:</p>
+<div id="roomCode" class="room-code"></div>
+<button id="copyRoomCode" class="secondary">Code kopieren</button>
+
+<h3>Spieler: <span id="playerCount">0</span>/50</h3>
+<div id="playerList" class="player-list"></div>
+
+<div id="hostControls">
+<h3>Quiz auswählen</h3>
+<select id="quizSelect"></select>
+<button id="startQuiz" class="wide">⚔️ Quiz starten</button>
+</div>
+
+<p id="waitingText" class="muted hidden">Warte auf den Host ...</p>
+<button id="leaveRoom" class="secondary">Raum verlassen</button>
+</section>
+
+<!-- SPIEL -->
+<section id="game" class="panel hidden">
+<h3 id="gameQuizTitle"></h3>
+<p id="questionCounter"></p>
+
+<div class="timer-track">
+<div id="timerFill" class="timer-fill"></div>
+</div>
+
+<p>⏱ <strong id="timerSeconds">15</strong> Sekunden ·
+<span id="answerCount">0 Antworten</span></p>
+
+<div id="questionCard" class="question-card">
+<div class="question-inner">
+<h2 id="questionText"></h2>
+</div>
+</div>
+
+<div id="answerButtons" class="answer-grid"></div>
+<div id="specialAnswers"></div>
+
+<button id="submitAnswer" class="wide hidden">Antwort abgeben</button>
+<p id="answerMessage" class="muted"></p>
+</section>
+
+<!-- ZWISCHENRANGLISTE -->
+<section id="ranking" class="panel hidden">
+<h2 id="correctAnswerText"></h2>
+<h2>🏅 Top 5</h2>
+<div id="topFive" class="pop"></div>
+<p id="nextQuestionText" class="muted"></p>
+</section>
+
+<!-- FINALE -->
+<section id="finished" class="panel hidden">
+<div class="trophy">🏆</div>
+<h2 id="winnerName" class="winner"></h2>
+<h3>🥇 Endrangliste</h3>
+<div id="finalRanking"></div>
+<button id="playAgain" class="wide">🔄 Neue Runde</button>
+<button id="finishHome" class="secondary">Zur Startseite</button>
+</section>
+
 </main>
 
+<div id="message" class="hidden"></div>
+<div id="confetti" class="confetti-area"></div>
+
 <script>
-const socket = io();
+"use strict";
+
 const $ = id => document.getElementById(id);
+const pages = [
+    "home", "ideas", "editor", "admin",
+    "lobby", "game", "ranking", "finished"
+];
 
+let socket = null;
 let roomCode = "";
-let myName = "";
 let isHost = false;
-let hasAnswered = false;
-let selectedValue = null;
+let chosenEmojis = ["😎"];
+let avatarImage = "";
+let coverImage = "";
+let editorQuestions = [];
+let currentQuestion = null;
+let selectedAnswers = [];
+let orderedAnswers = [];
 let timerInterval = null;
-let questionData = null;
+let messageTimer = null;
 
-function show(panel) {
-    ["home", "lobby", "quiz", "scorePanel", "finished"].forEach(id => {
-        $(id).classList.add("hidden");
+function show(page) {
+    pages.forEach(id => {
+        $(id).classList.toggle("hidden", id !== page);
     });
-    $(panel).classList.remove("hidden");
+    window.scrollTo(0, 0);
 }
 
 function message(text) {
     $("message").textContent = text;
     $("message").classList.remove("hidden");
+    clearTimeout(messageTimer);
+    messageTimer = setTimeout(() => {
+        $("message").classList.add("hidden");
+    }, 5000);
 }
 
-function renderPlayers(players) {
-    $("players").replaceChildren();
-
-    players.forEach(player => {
-        const li = document.createElement("li");
-        li.textContent = player.name +
-            (player.is_host ? " 👑 Spielleiter" : "");
-        $("players").appendChild(li);
-    });
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[c]);
 }
 
-function renderScores(players, targetId) {
-    const target = $(targetId);
-    target.replaceChildren();
-
-    players.forEach((player, index) => {
-        const row = document.createElement("div");
-        row.className = "leader-row";
-
-        const name = document.createElement("span");
-        name.textContent =
-            `${["🥇", "🥈", "🥉"][index] || "#" + (index + 1)} ${player.name}`;
-
-        const score = document.createElement("span");
-        score.className = "points";
-        score.textContent = `${player.score || 0} Punkte`;
-
-        row.append(name, score);
-        target.appendChild(row);
-    });
+function safeColor(value, fallback) {
+    return /^#[0-9a-fA-F]{6}$/.test(value || "")
+        ? value : fallback;
 }
 
-function renderQuizSelection(room) {
-    const options = room.quiz_options || [];
-    const select = $("quizSelect");
+function avatarHTML(player) {
+    const bg = safeColor(player.bg, "#32215e");
+    const border = safeColor(player.border, "#8b5cf6");
 
-    $("hostQuizControls").classList.toggle("hidden", !isHost);
-    $("guestQuizInfo").classList.toggle("hidden", isHost);
+    const inside = (
+        typeof player.image === "string" &&
+        player.image.startsWith("data:image/jpeg;base64,")
+    )
+        ? `<img src="${player.image}" alt="Avatar">`
+        : escapeHTML(player.emojis || "😎");
 
-    if (isHost) {
-        const previousValue = room.selected_quiz;
-        select.replaceChildren();
+    return `<div class="avatar"
+        style="--bg:${bg};--border:${border}">
+        ${inside}
+    </div>`;
+}
 
-        options.forEach(quiz => {
-            const option = document.createElement("option");
-            option.value = quiz.value;
-            option.textContent = quiz.label;
-            select.appendChild(option);
-        });
+document.querySelectorAll(".homeButton").forEach(button => {
+    button.onclick = () => show("home");
+});
 
-        select.value = previousValue || "minecraft";
+// ---------------------------------------
+// VERBINDUNG
+// ---------------------------------------
 
-        const selected = options.find(q => q.value === select.value);
-        $("quizDescription").textContent =
-            selected ? selected.description : "";
-    } else {
-        $("selectedQuizName").textContent =
-            room.quiz_name || "Minecraft-Wissen";
-
-        const selected = options.find(
-            q => q.value === room.selected_quiz
-        );
-
-        $("guestQuizDescription").textContent =
-            selected ? selected.description : "";
+function connectSocket() {
+    if (typeof io === "undefined") {
+        $("connectionStatus").textContent =
+            "❌ Socket.IO konnte nicht geladen werden";
+        message("Prüfe deine Internetverbindung.");
+        return;
     }
 
-    $("startButton").textContent =
-        `⚔️ ${room.quiz_name || "Quiz"} starten`;
+    socket = io({
+        reconnection: true,
+        reconnectionAttempts: 10
+    });
+
+    socket.on("connect", () => {
+        $("connectionStatus").textContent =
+            "🟢 Mit dem Server verbunden";
+    });
+
+    socket.on("connect_error", error => {
+        $("connectionStatus").textContent =
+            "🔴 Serververbindung fehlgeschlagen";
+        console.error("Verbindungsfehler:", error);
+    });
+
+    socket.on("disconnect", () => {
+        $("connectionStatus").textContent =
+            "🟠 Verbindung unterbrochen";
+    });
+
+    socket.on("app_error", data => {
+        message(data.message || "Ein Fehler ist aufgetreten.");
+    });
+
+    socket.on("joined", data => {
+        roomCode = data.code;
+        $("roomCode").textContent = roomCode;
+        show("lobby");
+    });
+
+    socket.on("room_updated", updateLobby);
+    socket.on("question", showQuestion);
+
+    socket.on("answered", data => {
+        $("answerMessage").textContent = data.correct
+            ? `✅ Richtig! +${data.points} Punkte`
+            : "❌ Leider falsch.";
+    });
+
+    socket.on("answer_count", data => {
+        $("answerCount").textContent =
+            `${data.count}/${data.total} Antworten`;
+    });
+
+    socket.on("result", showRanking);
+    socket.on("finished", showFinished);
 }
 
-function renderRoom(room) {
-    roomCode = room.code;
+function ensureConnection() {
+    if (!socket || !socket.connected) {
+        message("Keine Serververbindung. Bitte Seite neu laden.");
+        return false;
+    }
+    return true;
+}
+
+// ---------------------------------------
+// AVATAR
+// ---------------------------------------
+
+const emojiChoices = [
+    "😎", "😀", "🤖", "👑", "🔥", "⚡",
+    "🎮", "🐉", "💎", "🐼", "👽", "🚀",
+    "🦊", "🐺", "🌈", "🏆", "🥷", "🦄"
+];
+
+function renderEmojiChoices() {
+    $("emojiList").replaceChildren();
+
+    emojiChoices.forEach(emoji => {
+        const button = document.createElement("button");
+        button.className = "emoji";
+        button.textContent = emoji;
+
+        if (chosenEmojis.includes(emoji)) {
+            button.classList.add("active");
+        }
+
+        button.onclick = () => {
+            if (chosenEmojis.includes(emoji)) {
+                chosenEmojis = chosenEmojis.filter(x => x !== emoji);
+            } else {
+                chosenEmojis.push(emoji);
+            }
+
+            renderEmojiChoices();
+            updateAvatarPreview();
+        };
+
+        $("emojiList").append(button);
+    });
+}
+
+function getProfile() {
+    return {
+        emojis: (
+            chosenEmojis.join("") + $("customEmojis").value
+        ).slice(0, 32) || "😎",
+        bg: $("avatarBg").value,
+        border: $("avatarBorder").value,
+        image: avatarImage
+    };
+}
+
+function updateAvatarPreview() {
+    const profile = getProfile();
+    const preview = $("avatarPreview");
+
+    preview.style.setProperty("--bg", profile.bg);
+    preview.style.setProperty("--border", profile.border);
+    preview.replaceChildren();
+
+    if (profile.image) {
+        const img = document.createElement("img");
+        img.src = profile.image;
+        preview.append(img);
+    } else {
+        preview.textContent = profile.emojis;
+    }
+
+    $("namePreview").textContent =
+        $("playerName").value.trim() || "Champion";
+}
+
+[
+    "playerName",
+    "customEmojis",
+    "avatarBg",
+    "avatarBorder"
+].forEach(id => {
+    $(id).addEventListener("input", updateAvatarPreview);
+});
+
+async function compressImage(file) {
+    if (!file) return "";
+
+    if (!file.type.startsWith("image/")) {
+        throw Error("Bitte ein Bild auswählen.");
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+        throw Error("Das Bild darf maximal 8 MB groß sein.");
+    }
+
+    const source = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(
+            Error("Bild konnte nicht gelesen werden.")
+        );
+
+        reader.readAsDataURL(file);
+    });
+
+    const image = await new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(
+            Error("Bild konnte nicht geöffnet werden.")
+        );
+
+        img.src = source;
+    });
+
+    let maxSize = 500;
+    let quality = .65;
+
+    for (let attempt = 0; attempt < 6; attempt++) {
+        const factor = Math.min(
+            1,
+            maxSize / image.width,
+            maxSize / image.height
+        );
+
+        const canvas = document.createElement("canvas");
+
+        canvas.width = Math.max(
+            1,
+            Math.round(image.width * factor)
+        );
+
+        canvas.height = Math.max(
+            1,
+            Math.round(image.height * factor)
+        );
+
+        canvas.getContext("2d").drawImage(
+            image,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        const data = canvas.toDataURL("image/jpeg", quality);
+
+        if (data.length <= 150000) return data;
+
+        maxSize = Math.round(maxSize * .75);
+        quality *= .8;
+    }
+
+    throw Error("Das Bild ist zu groß.");
+}
+
+$("avatarFile").onchange = async event => {
+    try {
+        avatarImage = await compressImage(event.target.files[0]);
+        updateAvatarPreview();
+        message("Profilbild übernommen.");
+    } catch (error) {
+        message(error.message);
+    }
+};
+
+$("removeAvatar").onclick = () => {
+    avatarImage = "";
+    $("avatarFile").value = "";
+    updateAvatarPreview();
+};
+
+renderEmojiChoices();
+updateAvatarPreview();
+
+// ---------------------------------------
+// API
+// ---------------------------------------
+
+async function api(url, method = "GET", data) {
+    const response = await fetch(url, {
+        method,
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: data === undefined
+            ? undefined
+            : JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw Error(result.error || "Serverfehler");
+    }
+
+    return result;
+}
+
+// ---------------------------------------
+// RÄUME
+// ---------------------------------------
+
+$("createRoom").onclick = () => {
+    if (!ensureConnection()) return;
+
+    socket.emit("create_room", {
+        name: $("playerName").value.trim() || "Champion",
+        profile: getProfile()
+    });
+};
+
+$("joinCode").oninput = event => {
+    event.target.value = event.target.value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 5);
+};
+
+$("joinRoom").onclick = () => {
+    if (!ensureConnection()) return;
+
+    const code = $("joinCode").value.trim().toUpperCase();
+
+    if (code.length !== 5) {
+        message("Bitte einen fünfstelligen Raumcode eingeben.");
+        return;
+    }
+
+    socket.emit("join_room", {
+        code,
+        name: $("playerName").value.trim() || "Champion",
+        profile: getProfile()
+    });
+};
+
+function updateLobby(room) {
+    if (room.code !== roomCode) return;
+
     isHost = room.players.some(
-        player => player.name === myName && player.is_host
+        player => player.id === socket.id && player.host
     );
 
-    $("codeDisplay").textContent = room.code;
-    $("count").textContent = room.players.length;
+    $("hostControls").classList.toggle("hidden", !isHost);
+    $("waitingText").classList.toggle("hidden", isHost);
 
-    renderPlayers(room.players);
-    renderQuizSelection(room);
+    $("playerCount").textContent = room.players.length;
 
-    $("startButton").classList.toggle(
-        "hidden", !isHost || room.status !== "waiting"
-    );
+    $("playerList").innerHTML = room.players.map(player => `
+        <div class="player profile">
+            ${avatarHTML(player)}
+            <div>
+                <strong>${escapeHTML(player.name)}</strong>
+                <p class="muted">
+                    ${player.host ? "👑 Host" : "🎮 Spieler"}
+                </p>
+            </div>
+        </div>
+    `).join("");
 
-    $("waiting").classList.toggle(
-        "hidden", isHost || room.status !== "waiting"
-    );
+    $("quizSelect").innerHTML = room.quiz_options.map(quiz => `
+        <option value="${escapeHTML(quiz.id)}">
+            ${escapeHTML(quiz.title)}
+        </option>
+    `).join("");
 
-    $("message").classList.add("hidden");
+    $("quizSelect").value = room.quiz;
 
     if (room.status === "waiting") {
         show("lobby");
     }
 }
 
-$("createForm").addEventListener("submit", event => {
-    event.preventDefault();
-    myName = $("createName").value.trim();
-    socket.emit("create_room", {name: myName});
-});
+$("quizSelect").onchange = () => {
+    if (!ensureConnection()) return;
 
-$("joinForm").addEventListener("submit", event => {
-    event.preventDefault();
-    myName = $("joinName").value.trim();
-
-    socket.emit("join_room", {
-        name: myName,
-        code: $("joinCode").value.trim().toUpperCase()
-    });
-});
-
-$("joinCode").addEventListener("input", event => {
-    event.target.value = event.target.value
-        .toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-});
-
-socket.on("room_joined", data => {
-    renderRoom(data.room);
-    message(data.message || "Verbunden!");
-});
-
-socket.on("room_updated", data => {
-    if (data.room && data.room.code === roomCode) {
-        renderRoom(data.room);
-        renderScores(data.room.players, "leaderboard");
-    }
-});
-
-socket.on("error_message", data => {
-    message(data.message || "Fehler");
-});
-
-$("quizSelect").addEventListener("change", () => {
     socket.emit("select_quiz", {
         code: roomCode,
         quiz: $("quizSelect").value
     });
-});
+};
 
-$("startButton").addEventListener("click", () => {
-    socket.emit("start_game", {code: roomCode});
-});
+$("startQuiz").onclick = () => {
+    if (!ensureConnection()) return;
 
-$("copyButton").addEventListener("click", async () => {
+    socket.emit("start_game", {
+        code: roomCode
+    });
+};
+
+$("copyRoomCode").onclick = async () => {
     try {
         await navigator.clipboard.writeText(roomCode);
-        $("copyButton").textContent = "Code kopiert ✓";
+        message("Raumcode kopiert!");
     } catch {
         message("Dein Raumcode: " + roomCode);
     }
-});
+};
 
-socket.on("quiz_question", data => {
-    questionData = data;
-    hasAnswered = false;
-    selectedValue = null;
+$("leaveRoom").onclick = () => location.reload();
 
-    clearInterval(timerInterval);
-    show("quiz");
+// ---------------------------------------
+// SPIELFRAGEN
+// ---------------------------------------
 
-    $("quizTitle").textContent = "⛏ " +
-        (data.quiz_name || "Minecraft-Wissen");
+function showQuestion(question) {
+    currentQuestion = { ...question, sent: false };
+    selectedAnswers = [];
+    orderedAnswers = [];
 
-    $("questionNumber").textContent =
-        `Frage ${data.number} von ${data.total}`;
+    show("game");
 
-    $("questionText").textContent = data.question;
-    $("answerStatus").textContent = "";
-    $("explanation").classList.add("hidden");
-    $("explanation").textContent = "";
-    $("timerBar").style.width = "100%";
-    $("timerBar").style.background = "#a79aff";
+    $("gameQuizTitle").textContent = question.quiz_name;
+    $("questionCounter").textContent =
+        `Frage ${question.number} von ${question.total}`;
+    $("questionText").textContent = question.text;
+    $("answerCount").textContent = "0 Antworten";
+    $("answerMessage").textContent = "";
 
-    $("answers").replaceChildren();
+    $("answerButtons").replaceChildren();
+    $("specialAnswers").replaceChildren();
 
-    data.options.forEach(option => {
-        const button = document.createElement("button");
-        button.className = "answer";
-        button.textContent = option.label;
+    $("submitAnswer").disabled = false;
+    $("submitAnswer").classList.add("hidden");
 
-        button.addEventListener("click", () => {
-            submitAnswer(option.value, button);
+    $("questionCard").style.backgroundColor =
+        question.bg || "#29204b";
+
+    $("questionCard").style.backgroundImage = question.image
+        ? `url("${question.image}")`
+        : "none";
+
+    if (question.type === "estimate") {
+        const label = document.createElement("label");
+        label.textContent = "Deine Schätzung";
+
+        const input = document.createElement("input");
+        input.id = "estimateInput";
+        input.type = "number";
+        input.step = "any";
+        input.placeholder = "Zahl eingeben";
+
+        label.append(input);
+        $("specialAnswers").append(label);
+        $("submitAnswer").classList.remove("hidden");
+
+    } else if (question.type === "order") {
+        const text = document.createElement("p");
+        text.textContent =
+            "Tippe die Antworten in der richtigen Reihenfolge an:";
+
+        const display = document.createElement("p");
+        display.id = "orderedDisplay";
+
+        $("specialAnswers").append(text, display);
+
+        question.options.forEach(option => {
+            const button = document.createElement("button");
+            button.className = "answer";
+            button.textContent = option;
+
+            button.onclick = () => {
+                if (currentQuestion.sent) return;
+
+                orderedAnswers.push(option);
+                button.disabled = true;
+                display.textContent = orderedAnswers.join(" → ");
+            };
+
+            $("answerButtons").append(button);
         });
 
-        $("answers").appendChild(button);
-    });
+        const reset = document.createElement("button");
+        reset.className = "secondary";
+        reset.textContent = "↩️ Reihenfolge zurücksetzen";
 
-    let remaining = data.duration;
-    $("timerText").textContent = remaining;
+        reset.onclick = () => {
+            if (currentQuestion.sent) return;
 
-    timerInterval = setInterval(() => {
-        remaining = Math.max(0, remaining - 0.1);
-        $("timerText").textContent = Math.ceil(remaining);
+            orderedAnswers = [];
+            display.textContent = "";
 
-        $("timerBar").style.width =
-            (remaining / data.duration * 100) + "%";
+            document.querySelectorAll(
+                "#answerButtons .answer"
+            ).forEach(button => button.disabled = false);
+        };
 
-        if (remaining <= 5) {
-            $("timerBar").style.background = "#ff7770";
+        $("specialAnswers").append(reset);
+        $("submitAnswer").classList.remove("hidden");
+
+    } else {
+        question.options.forEach((option, index) => {
+            const button = document.createElement("button");
+            button.className = "answer";
+            button.textContent = option;
+
+            button.onclick = () => {
+                if (currentQuestion.sent) return;
+
+                if (question.type === "choice") {
+                    if (selectedAnswers.includes(index)) {
+                        selectedAnswers = selectedAnswers.filter(
+                            value => value !== index
+                        );
+                    } else {
+                        selectedAnswers.push(index);
+                    }
+
+                    document.querySelectorAll(
+                        "#answerButtons .answer"
+                    ).forEach((element, i) => {
+                        element.classList.toggle(
+                            "selected",
+                            selectedAnswers.includes(i)
+                        );
+                    });
+
+                } else {
+                    selectedAnswers = [index];
+                    button.classList.add("selected");
+                    sendAnswer();
+                }
+            };
+
+            $("answerButtons").append(button);
+        });
+
+        if (question.type === "choice") {
+            $("submitAnswer").classList.remove("hidden");
+            $("answerMessage").textContent =
+                "Eine oder mehrere Antworten können richtig sein.";
         }
+    }
+
+    clearInterval(timerInterval);
+
+    const endTime = performance.now() + question.duration * 1000;
+
+    function updateTimer() {
+        const remaining = Math.max(
+            0,
+            (endTime - performance.now()) / 1000
+        );
+
+        $("timerSeconds").textContent = Math.ceil(remaining);
+        $("timerFill").style.width =
+            (remaining / question.duration * 100) + "%";
 
         if (remaining <= 0) {
             clearInterval(timerInterval);
         }
-    }, 100);
-});
+    }
 
-function submitAnswer(value, button) {
-    if (hasAnswered || !questionData) return;
-
-    hasAnswered = true;
-    selectedValue = value;
-
-    document.querySelectorAll(".answer").forEach(b => {
-        b.disabled = true;
-    });
-
-    button.classList.add("selected");
-    $("answerStatus").textContent = "Antwort wird gesendet ...";
-
-    socket.emit("submit_answer", {
-        code: roomCode,
-        value: value
-    });
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 100);
 }
 
-socket.on("answer_received", data => {
-    $("answerStatus").textContent =
-        data.message || "Antwort gespeichert!";
-});
+function sendAnswer() {
+    if (!currentQuestion || currentQuestion.sent) return;
+    if (!ensureConnection()) return;
 
-socket.on("quiz_result", data => {
-    clearInterval(timerInterval);
+    let value;
 
-    const correctOption = questionData.options.find(
-        option => option.value === data.correct_value
-    );
+    if (currentQuestion.type === "estimate") {
+        const input = $("estimateInput");
 
-    document.querySelectorAll(".answer").forEach(button => {
-        button.disabled = true;
-
-        const option = questionData.options.find(
-            item => item.label === button.textContent
-        );
-
-        if (option && option.value === data.correct_value) {
-            button.classList.add("correct");
-        } else if (option && option.value === selectedValue) {
-            button.classList.add("wrong");
+        if (!input.value.trim()) {
+            message("Bitte eine Zahl eingeben.");
+            return;
         }
+
+        value = Number(input.value);
+
+        if (!Number.isFinite(value)) {
+            message("Bitte eine gültige Zahl eingeben.");
+            return;
+        }
+
+    } else if (currentQuestion.type === "order") {
+        if (orderedAnswers.length !== currentQuestion.options.length) {
+            message("Bitte alle Antworten auswählen.");
+            return;
+        }
+
+        value = orderedAnswers.slice();
+
+    } else {
+        if (!selectedAnswers.length) {
+            message("Bitte eine Antwort auswählen.");
+            return;
+        }
+
+        value = selectedAnswers.slice();
+    }
+
+    currentQuestion.sent = true;
+
+    socket.emit("answer", {
+        code: roomCode,
+        value
     });
 
-    $("timerText").textContent = "0";
-    $("timerBar").style.width = "0%";
+    $("submitAnswer").disabled = true;
 
-    $("explanation").classList.remove("hidden");
-    $("explanation").textContent =
-        `Richtige Antwort: ${correctOption ? correctOption.label : data.correct_value}. ` +
-        (data.explanation || "");
+    document.querySelectorAll("#answerButtons .answer")
+        .forEach(button => button.disabled = true);
 
-    $("answerStatus").textContent = hasAnswered
-        ? "Antwort ausgewertet!"
-        : "Zeit abgelaufen!";
+    $("answerMessage").textContent = "Antwort gesendet!";
+}
 
-    renderScores(data.leaderboard || [], "leaderboard");
-    $("scoreMessage").textContent = "Die nächste Frage kommt gleich ...";
-    $("scorePanel").classList.remove("hidden");
-});
+$("submitAnswer").onclick = sendAnswer;
 
-socket.on("game_finished", data => {
+// ---------------------------------------
+// RANGLISTE
+// ---------------------------------------
+
+function drawRanking(players, containerId, limit) {
+    $(containerId).innerHTML = players
+        .slice(0, limit || players.length)
+        .map((player, index) => `
+            <div class="rank">
+                <div class="profile">
+                    <strong>
+                        ${["🥇", "🥈", "🥉"][index] || "#" + (index + 1)}
+                    </strong>
+                    ${avatarHTML(player)}
+                    <strong>${escapeHTML(player.name)}</strong>
+                </div>
+                <div class="points">${player.score} Punkte</div>
+            </div>
+        `)
+        .join("");
+}
+
+function showRanking(data) {
+    clearInterval(timerInterval);
+    show("ranking");
+
+    $("correctAnswerText").textContent =
+        "✅ Richtige Antwort: " + data.correct_text;
+
+    drawRanking(data.ranking, "topFive", 5);
+
+    $("nextQuestionText").textContent =
+        `Weiter in ${data.seconds} Sekunden ...`;
+}
+
+// ---------------------------------------
+// GEWINNER
+// ---------------------------------------
+
+function confetti() {
+    const area = $("confetti");
+    area.replaceChildren();
+
+    const colors = [
+        "#ffd700",
+        "#a78bfa",
+        "#ff69b4",
+        "#22c55e"
+    ];
+
+    for (let i = 0; i < 100; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.style.left = Math.random() * 100 + "%";
+        piece.style.backgroundColor = colors[i % colors.length];
+        piece.style.animationDelay = Math.random() * 1.7 + "s";
+        area.append(piece);
+    }
+
+    setTimeout(() => area.replaceChildren(), 6500);
+}
+
+function showFinished(data) {
     clearInterval(timerInterval);
     show("finished");
 
-    const players = data.leaderboard || [];
-    renderScores(players, "finalScores");
+    $("winnerName").textContent = data.ranking.length
+        ? data.ranking[0].name + " gewinnt!"
+        : "Quiz beendet!";
 
-    $("winner").textContent = players.length
-        ? `Glückwunsch an ${players[0].name} mit ${players[0].score || 0} Punkten!`
-        : "Gut gespielt!";
-});
+    drawRanking(data.ranking, "finalRanking");
 
-$("backButton").addEventListener("click", () => location.reload());
+    $("playAgain").classList.toggle("hidden", !isHost);
+    confetti();
+}
 
-socket.on("connect_error", () => {
-    message("Verbindung fehlgeschlagen. Lade die Seite neu.");
-});
+$("playAgain").onclick = () => {
+    if (!ensureConnection()) return;
+    socket.emit("again", { code: roomCode });
+};
+
+$("finishHome").onclick = () => location.reload();
+
+// ---------------------------------------
+// IDEEN
+// ---------------------------------------
+
+$("openIdeas").onclick = () => show("ideas");
+
+$("sendIdea").onclick = async () => {
+    try {
+        const result = await api("/api/ideas", "POST", {
+            name: $("ideaName").value,
+            text: $("ideaText").value
+        });
+
+        message(result.message);
+        $("ideaText").value = "";
+        show("home");
+
+    } catch (error) {
+        message(error.message);
+    }
+};
+
+// ---------------------------------------
+// QUIZ-EDITOR
+// ---------------------------------------
+
+function newQuestion() {
+    return {
+        type: "choice",
+        text: "",
+        options: ["", "", "", ""],
+        correct: [0],
+        duration: 15,
+        points: 500,
+        bonus: true,
+        bg: "#29204b",
+        image: "",
+        target: 0,
+        tolerance: 0
+    };
+}
+
+function addQuestion() {
+    if (editorQuestions.length >= 30) {
+        message("Maximal 30 Fragen.");
+        return;
+    }
+
+    editorQuestions.push(newQuestion());
+    renderEditor();
+}
+
+$("openEditor").onclick = () => {
+    if (!editorQuestions.length) addQuestion();
+    show("editor");
+};
+
+$("addQuestion").onclick = addQuestion;
+
+$("coverFile").onchange = async event => {
+    try {
+        coverImage = await compressImage(event.target.files[0]);
+        message("Quiz-Titelbild übernommen.");
+    } catch (error) {
+        message(error.message);
+    }
+};
+
+function renderEditor() {
+    const container = $("editorQuestions");
+    container.replaceChildren();
+
+    editorQuestions.forEach((question, index) => {
+        const card = document.createElement("div");
+        card.className = "editor-question";
+
+        card.innerHTML = `
+            <h3>Frage ${index + 1}</h3>
+            <div class="row">
+                <button data-action="up" class="secondary">⬆️</button>
+                <button data-action="down" class="secondary">⬇️</button>
+                <button data-action="duplicate" class="secondary">
+                    Duplizieren
+                </button>
+                <button data-action="delete" class="danger">
+                    Löschen
+                </button>
+            </div>
+
+            <label>Fragetyp
+                <select data-field="type">
+                    <option value="choice">Multiple Choice</option>
+                    <option value="yesno">Ja / Nein</option>
+                    <option value="truefalse">Richtig / Falsch</option>
+                    <option value="estimate">Schätzfrage</option>
+                    <option value="order">Reihenfolge</option>
+                </select>
+            </label>
+
+            <label>Fragetext
+                <textarea data-field="text" rows="2"></textarea>
+            </label>
+
+            <div class="grid">
+                <label>Zeit (5–120 Sekunden)
+                    <input type="number" min="5" max="120"
+                        data-field="duration">
+                </label>
+
+                <label>Grundpunkte
+                    <input type="number" min="100" max="2000"
+                        data-field="points">
+                </label>
+
+                <label class="checkline">
+                    <input type="checkbox" data-field="bonus">
+                    Zeitbonus
+                </label>
+
+                <label>Hintergrundfarbe
+                    <input type="color" data-field="bg">
+                </label>
+            </div>
+
+            <label>Fragenbild
+                <input type="file" accept="image/*" data-field="image">
+            </label>
+
+            <button data-action="removeImage" class="secondary">
+                Bild entfernen
+            </button>
+
+            <div data-options></div>
+        `;
+
+        for (const field of [
+            "type", "text", "duration", "points", "bg"
+        ]) {
+            card.querySelector(`[data-field="${field}"]`).value =
+                question[field];
+        }
+
+        card.querySelector('[data-field="bonus"]').checked =
+            question.bonus;
+
+        card.querySelectorAll("[data-field]").forEach(input => {
+            const field = input.dataset.field;
+
+            if (field === "image") {
+                input.onchange = async event => {
+                    try {
+                        question.image = await compressImage(
+                            event.target.files[0]
+                        );
+                        message("Fragenbild übernommen.");
+                    } catch (error) {
+                        message(error.message);
+                    }
+                };
+                return;
+            }
+
+            if (field === "type") {
+                input.onchange = () => {
+                    question.type = input.value;
+                    question.correct = [0];
+
+                    if (question.type === "yesno") {
+                        question.options = ["Ja", "Nein"];
+                    } else if (question.type === "truefalse") {
+                        question.options = ["Richtig", "Falsch"];
+                    } else if (
+                        question.type === "choice" ||
+                        question.type === "order"
+                    ) {
+                        question.options = ["Antwort 1", "Antwort 2"];
+                    }
+
+                    renderEditor();
+                };
+                return;
+            }
+
+            input.oninput = () => {
+                question[field] = input.type === "checkbox"
+                    ? input.checked
+                    : input.type === "number"
+                        ? Number(input.value)
+                        : input.value;
+            };
+        });
+
+        card.querySelectorAll("[data-action]").forEach(button => {
+            button.onclick = () => {
+                const action = button.dataset.action;
+
+                if (action === "removeImage") {
+                    question.image = "";
+                    message("Fragenbild entfernt.");
+                    return;
+                }
+
+                if (action === "delete") {
+                    if (editorQuestions.length <= 1) {
+                        message("Mindestens eine Frage behalten.");
+                        return;
+                    }
+
+                    editorQuestions.splice(index, 1);
+                }
+
+                if (action === "duplicate") {
+                    if (editorQuestions.length >= 30) {
+                        message("Maximal 30 Fragen.");
+                        return;
+                    }
+
+                    editorQuestions.splice(
+                        index + 1,
+                        0,
+                        JSON.parse(JSON.stringify(question))
+                    );
+                }
+
+                if (action === "up" && index > 0) {
+                    [
+                        editorQuestions[index - 1],
+                        editorQuestions[index]
+                    ] = [
+                        editorQuestions[index],
+                        editorQuestions[index - 1]
+                    ];
+                }
+
+                if (
+                    action === "down" &&
+                    index < editorQuestions.length - 1
+                ) {
+                    [
+                        editorQuestions[index + 1],
+                        editorQuestions[index]
+                    ] = [
+                        editorQuestions[index],
+                        editorQuestions[index + 1]
+                    ];
+                }
+
+                renderEditor();
+            };
+        });
+
+        renderQuestionOptions(
+            card.querySelector("[data-options]"),
+            question
+        );
+
+        container.append(card);
+    });
+
+    $("perRound").max = editorQuestions.length;
+
+    if (Number($("perRound").value) > editorQuestions.length) {
+        $("perRound").value = editorQuestions.length;
+    }
+}
+
+function renderQuestionOptions(box, question) {
+    box.replaceChildren();
+
+    if (question.type === "estimate") {
+        const targetLabel = document.createElement("label");
+        targetLabel.textContent = "Richtiger Zahlenwert";
+
+        const target = document.createElement("input");
+        target.type = "number";
+        target.step = "any";
+        target.value = question.target;
+        target.oninput = () => {
+            question.target = Number(target.value);
+        };
+
+        targetLabel.append(target);
+
+        const toleranceLabel = document.createElement("label");
+        toleranceLabel.textContent = "Erlaubte Abweichung (±)";
+
+        const tolerance = document.createElement("input");
+        tolerance.type = "number";
+        tolerance.min = "0";
+        tolerance.step = "any";
+        tolerance.value = question.tolerance;
+        tolerance.oninput = () => {
+            question.tolerance = Number(tolerance.value);
+        };
+
+        toleranceLabel.append(tolerance);
+        box.append(targetLabel, toleranceLabel);
+        return;
+    }
+
+    const choice = question.type === "choice";
+    const fixed =
+        question.type === "yesno" ||
+        question.type === "truefalse";
+
+    if (question.type === "yesno") {
+        question.options = ["Ja", "Nein"];
+    }
+
+    if (question.type === "truefalse") {
+        question.options = ["Richtig", "Falsch"];
+    }
+
+    const info = document.createElement("p");
+    info.className = "muted";
+    info.textContent = question.type === "order"
+        ? "Trage die Antworten in der richtigen Reihenfolge ein."
+        : choice
+            ? "Markiere eine oder mehrere richtige Antworten."
+            : "Markiere die richtige Antwort.";
+
+    box.append(info);
+
+    if (!fixed) {
+        const add = document.createElement("button");
+        add.className = "secondary";
+        add.textContent = "➕ Antwort hinzufügen";
+
+        add.onclick = () => {
+            if (question.options.length >= 6) {
+                message("Maximal 6 Antworten.");
+                return;
+            }
+
+            question.options.push("");
+            renderQuestionOptions(box, question);
+        };
+
+        box.append(add);
+    }
+
+    question.options.forEach((option, index) => {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        if (question.type !== "order") {
+            const mark = document.createElement("input");
+
+            mark.type = choice ? "checkbox" : "radio";
+            mark.name =
+                "correct-" + editorQuestions.indexOf(question);
+            mark.checked = question.correct.includes(index);
+
+            mark.onchange = () => {
+                if (choice) {
+                    if (mark.checked) {
+                        question.correct = [
+                            ...new Set([...question.correct, index])
+                        ];
+                    } else {
+                        question.correct = question.correct.filter(
+                            value => value !== index
+                        );
+                    }
+                } else {
+                    question.correct = [index];
+                    renderQuestionOptions(box, question);
+                }
+            };
+
+            row.append(mark);
+        }
+
+        const input = document.createElement("input");
+        input.value = option;
+        input.placeholder = `Antwort ${index + 1}`;
+        input.disabled = fixed;
+
+        input.oninput = () => {
+            question.options[index] = input.value;
+        };
+
+        row.append(input);
+
+        if (!fixed && question.options.length > 2) {
+            const remove = document.createElement("button");
+            remove.className = "danger";
+            remove.textContent = "✕";
+
+            remove.onclick = () => {
+                question.options.splice(index, 1);
+
+                question.correct = question.correct
+                    .filter(value => value !== index)
+                    .map(value => value > index ? value - 1 : value);
+
+                if (!question.correct.length) {
+                    question.correct = [0];
+                }
+
+                renderQuestionOptions(box, question);
+            };
+
+            row.append(remove);
+        }
+
+        box.append(row);
+    });
+}
+
+function quizPayload() {
+    return {
+        title: $("quizTitle").value,
+        description: $("quizDescription").value,
+        category: $("quizCategory").value,
+        difficulty: $("quizDifficulty").value,
+        cover: coverImage,
+        per_round: Number($("perRound").value),
+        ranking_seconds: Number($("rankingSeconds").value),
+        shuffle: $("quizShuffle").checked,
+        questions: editorQuestions
+    };
+}
+
+$("previewQuiz").onclick = () => {
+    const preview = $("quizPreview");
+    preview.classList.remove("hidden");
+    preview.replaceChildren();
+
+    if (!editorQuestions.length) return;
+
+    const question = editorQuestions[0];
+
+    const heading = document.createElement("h3");
+    heading.textContent = "👀 Vorschau der ersten Frage";
+
+    const card = document.createElement("div");
+    card.className = "question-card";
+    card.style.backgroundColor = question.bg;
+
+    if (question.image) {
+        card.style.backgroundImage = `url("${question.image}")`;
+    }
+
+    const content = document.createElement("div");
+    content.className = "question-inner";
+
+    const title = document.createElement("h2");
+    title.textContent = question.text || "Deine Frage";
+
+    const options = document.createElement("p");
+    options.textContent = question.type === "estimate"
+        ? "Schätzfrage: Zahl eingeben"
+        : (question.options || []).join(" · ");
+
+    content.append(title, options);
+    card.append(content);
+    preview.append(heading, card);
+};
+
+$("submitQuiz").onclick = async () => {
+    try {
+        const result = await api(
+            "/api/quizzes",
+            "POST",
+            quizPayload()
+        );
+
+        message(result.message);
+        show("home");
+    } catch (error) {
+        message(error.message);
+    }
+};
+
+// ---------------------------------------
+// ADMIN
+// ---------------------------------------
+
+$("openAdmin").onclick = () => show("admin");
+
+$("adminLoginButton").onclick = async () => {
+    try {
+        await api("/api/admin/login", "POST", {
+            password: $("adminPassword").value
+        });
+
+        $("adminLogin").classList.add("hidden");
+        $("adminPanel").classList.remove("hidden");
+        loadAdmin();
+
+    } catch (error) {
+        message(error.message);
+    }
+};
+
+$("adminLogout").onclick = async () => {
+    try {
+        await api("/api/admin/logout", "POST");
+
+        $("adminPanel").classList.add("hidden");
+        $("adminLogin").classList.remove("hidden");
+        message("Abgemeldet.");
+    } catch (error) {
+        message(error.message);
+    }
+};
+
+$("adminRefresh").onclick = loadAdmin;
+
+function adminDecisionButtons(container, kind, id) {
+    [
+        ["approved", "✅ Annehmen"],
+        ["rejected", "❌ Ablehnen"]
+    ].forEach(([status, text]) => {
+        const button = document.createElement("button");
+        button.textContent = text;
+
+        if (status === "rejected") {
+            button.className = "danger";
+        }
+
+        button.onclick = async () => {
+            try {
+                await api(
+                    `/api/admin/${kind}/${id}`,
+                    "POST",
+                    { status }
+                );
+                loadAdmin();
+            } catch (error) {
+                message(error.message);
+            }
+        };
+
+        container.append(button);
+    });
+}
+
+async function loadAdmin() {
+    try {
+        const data = await api("/api/admin/items");
+
+        $("adminQuizzes").replaceChildren();
+
+        data.quizzes.forEach(quiz => {
+            const card = document.createElement("div");
+            card.className = "editor-question";
+
+            const heading = document.createElement("h3");
+            heading.textContent =
+                `${quiz.title} (${quiz.status})`;
+
+            const details = document.createElement("p");
+            details.textContent =
+                `${quiz.data.questions.length} Fragen`;
+
+            card.append(heading, details);
+
+            quiz.data.questions.forEach((question, index) => {
+                const p = document.createElement("p");
+                p.textContent = `${index + 1}. ${question.text}`;
+                card.append(p);
+            });
+
+            adminDecisionButtons(card, "quizzes", quiz.id);
+            $("adminQuizzes").append(card);
+        });
+
+        $("adminIdeas").replaceChildren();
+
+        data.ideas.forEach(idea => {
+            const card = document.createElement("div");
+            card.className = "editor-question";
+
+            const text = document.createElement("p");
+            text.textContent =
+                `${idea.name} (${idea.status}): ${idea.text}`;
+
+            card.append(text);
+
+            adminDecisionButtons(card, "ideas", idea.id);
+            $("adminIdeas").append(card);
+        });
+
+    } catch (error) {
+        message(error.message);
+    }
+}
+
+// ---------------------------------------
+// WEBSITE STARTEN
+// ---------------------------------------
+
+connectSocket();
+
+console.log("🏆 Class-Champion JavaScript vollständig geladen!");
 </script>
 </body>
 </html>
